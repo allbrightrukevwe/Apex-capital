@@ -19,7 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@prisma/client": ["./node_modules/@prisma/client"],
+      "@/generated/prisma": ["./src/generated/prisma"]
     }
   },
   "include": [
@@ -29,6 +31,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-  ],
+, "prisma/seed.ts"  ],
   "exclude": ["node_modules"]
 }

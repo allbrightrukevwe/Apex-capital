@@ -1,0 +1,550 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== USER & AUTH ====================
+
+model User {
+  id                Int                @id @default(autoincrement())
+  email             String             @unique
+  firstName         String?
+  lastName          String?
+  fullName          String?
+  password          String
+  phone             String?
+  country           String?
+  currency          String             @default("USD")
+  balance           Float              @default(0)
+  totalDeposits     Float              @default(0)
+  totalWithdrawals  Float              @default(0)
+  totalProfit       Float              @default(0)
+  totalTrades       Int                @default(0)
+  isAdmin           Boolean            @default(false)
+  isActive          Boolean            @default(true)
+  emailVerified     Boolean            @default(false)
+  emailVerifiedAt   DateTime?
+  lastLogin         DateTime?
+  profileImage      String?
+  referralCode      String?            @unique
+  referredBy        Int?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  // Relations
+  accounts          Account[]
+  activities        Activity[]
+  bots              Bot[]
+  chatMessages      ChatMessage[]
+  deposits          Deposit[]
+  depositAddresses  DepositAddress[]
+  multiChainWallets MultiChainWallet[]
+  notifications     Notification[]
+  sessions          Session[]
+  trades            Trade[]
+  transactions      Transaction[]
+  wallets           Wallet[]
+  withdrawals       Withdrawal[]
+  botPackages       UserBotPackage[]
+  botActivations    BotActivation[]    // Added
+  passkeys          Passkey[]          // Added - for passkeys owned by user
+  
+  // Referral relations
+  referralsMade     Referral[]         @relation("ReferralReferrer")
+  referralsReceived Referral[]         @relation("ReferralReferred")
+  apiKeys           ApiKey[]
+
+  @@index([email])
+  @@index([referralCode])
+  @@map("users")
+}
+
+model Session {
+  id          String   @id @default(cuid())
+  userId      Int
+  token       String   @unique
+  deviceInfo  String?
+  ipAddress   String?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Account {
+  id              String    @id @default(cuid())
+  userId          Int
+  balance         Float     @default(0)
+  totalDeposits   Float     @default(0)
+  totalWithdrawals Float    @default(0)
+  totalProfit     Float     @default(0)
+  totalTrades     Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+  @@map("accounts")
+}
+
+// ==================== DEPOSITS & WITHDRAWALS ====================
+
+model DepositAddress {
+  id          String   @id @default(cuid())
+  userId      Int
+  address     String   @unique
+  privateKey  String?
+  network     String   @default("nile")
+  isActive    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  deposits    Deposit[]
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([address])
+  @@index([userId])
+  @@map("deposit_addresses")
+}
+
+model Deposit {
+  id            String          @id @default(cuid())
+  userId        Int
+  addressId     String?
+  txHash        String          @unique
+  fromAddress   String
+  toAddress     String
+  amount        Float
+  currency      String          @default("USDT")
+  status        String          @default("pending") // pending, confirmed, completed, failed
+  confirmations Int             @default(0)
+  blockNumber   Int?
+  network       String          @default("TRC20")
+  fee           Float           @default(0)
+  processedAt   DateTime?
+  walletId      String?
+  nowpaymentsId String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  address       DepositAddress? @relation(fields: [addressId], references: [id])
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wallet        Wallet?         @relation(fields: [walletId], references: [id])
+
+  @@index([status])
+  @@index([txHash])
+  @@index([userId])
+  @@map("deposits")
+}
+
+model Withdrawal {
+  id              String    @id @default(cuid())
+  userId          Int
+  amount          Float
+  coin            String
+  network         String
+  address         String
+  fee             Float     @default(0)
+  status          String    @default("pending") // pending, processing, completed, failed, cancelled
+  transactionHash String?
+  notes           String?
+  processedBy     String?
+  processedAt     DateTime?
+  approvedBy      Int?
+  approvedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([userId])
+  @@map("withdrawals")
+}
+
+// ==================== TRANSACTIONS ====================
+
+model Transaction {
+  id          String   @id @default(cuid())
+  userId      Int
+  type        String   // deposit, withdrawal, bot_profit, plan_payment, referral_bonus
+  amount      Float
+  currency    String   @default("USD")
+  asset       String
+  status      String   @default("pending") // pending, completed, failed, cancelled
+  description String?
+  reference   String?
+  txHash      String?
+  completedAt DateTime?
+  metadata    Json?    @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([type])
+  @@index([status])
+  @@index([userId])
+  @@map("transactions")
+}
+
+// ==================== BOTS ====================
+
+model Bot {
+  id          String      @id @default(cuid())
+  userId      Int
+  name        String
+  type        String      // basic, bronze, silver, gold
+  version     String      @default("1.0.0")
+  description String?
+  strategy    String
+  status      String      @default("inactive") // active, inactive, paused, expired, running, stopped
+  isDeleted   Boolean     @default(false)
+  deletedAt   DateTime?
+  settings    Json        @default("{}")
+  fileData    String?
+  tradingPair String
+  amount      Float
+  sessionDuration String
+  passkey     String?
+  activatedAt DateTime?
+  expiresAt   DateTime?
+  lastRunAt   DateTime?
+  totalTrades Int         @default(0)
+  totalProfit Float       @default(0)
+  winRate     Float       @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trades      Trade[]
+  botPackages UserBotPackage[]
+  activations BotActivation[] // Added
+
+  @@index([status])
+  @@index([userId])
+  @@index([type])
+  @@map("bots")
+}
+
+model Trade {
+  id          String   @id @default(cuid())
+  userId      Int
+  botId       String?  // ✅ Changed to optional
+  asset       String
+  type        String   // buy, sell, long, short
+  amount      Float
+  price       Float
+  status      String   // pending, open, closed, cancelled
+  reason      String?
+  profit      Float    @default(0)
+  profitPercent Float @default(0)
+  entryPrice  Float?
+  exitPrice   Float?
+  entryTime   DateTime?
+  exitTime    DateTime?
+  duration    Int?     // in seconds
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bot         Bot?     @relation(fields: [botId], references: [id], onDelete: SetNull) // ✅ Changed to optional relation
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([botId])
+  @@index([userId])
+  @@map("trades")
+}
+// ==================== BOT PACKAGES ====================
+
+model BotPackage {
+  id            String           @id @default(cuid())
+  name          String           @unique
+  description   String
+  price         Float
+  currency      String           @default("USD")
+  tags          String[]         @default([])
+  features      String[]         @default([])
+  activeBots    Int              @default(1)
+  winRate       String?
+  monthlyReturn String?
+  signalCycle   String?
+  tradeSize     String?
+  riskManagement String?
+  isActive      Boolean          @default(true)
+  sortOrder     Int              @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  userPackages  UserBotPackage[]
+  passkeys      Passkey[]        // Added - passkeys for this package
+  activations   BotActivation[]  // Added - activations for this package
+
+  @@map("bot_packages")
+}
+
+model UserBotPackage {
+  id          String      @id @default(cuid())
+  userId      Int
+  botPackageId String
+  botId       String?
+  status      String      @default("active") // active, expired, cancelled
+  price       Float
+  purchasedAt DateTime    @default(now())
+  expiresAt   DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  botPackage  BotPackage  @relation(fields: [botPackageId], references: [id])
+  bot         Bot?        @relation(fields: [botId], references: [id])
+
+  @@unique([userId, botPackageId])
+  @@index([userId])
+  @@map("user_bot_packages")
+}
+
+// ==================== PASSKEYS - NEW MODEL ====================
+
+model Passkey {
+  id          String      @id @default(cuid())
+  key         String      @unique
+  packageId   String
+  userId      Int?        // The user who purchased/owns this passkey
+  isUsed      Boolean     @default(false)
+  usedBy      Int?        // The user who activated the bot with this passkey
+  usedAt      DateTime?
+  expiresAt   DateTime
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  package     BotPackage  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  user        User?       @relation(fields: [userId], references: [id])
+  activation  BotActivation? // The bot activation that used this passkey
+
+  @@index([key])
+  @@index([packageId])
+  @@map("passkeys")
+}
+
+// ==================== BOT ACTIVATIONS - NEW MODEL ====================
+
+model BotActivation {
+  id          String      @id @default(cuid())
+  userId      Int
+  packageId   String
+  passkeyId   String
+  botId       String?     // Reference to the Bot model
+  status      String      @default("ACTIVE") // ACTIVE, PAUSED, STOPPED, EXPIRED
+  activatedAt DateTime    @default(now())
+  stoppedAt   DateTime?
+  expiresAt   DateTime
+  settings    Json?       @default("{}")
+  metadata    Json?       @default("{}")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  package     BotPackage  @relation(fields: [packageId], references: [id])
+  passkey     Passkey     @relation(fields: [passkeyId], references: [id])
+  bot         Bot?        @relation(fields: [botId], references: [id])
+
+  @@index([userId])
+  @@index([packageId])
+  @@index([status])
+  @@unique([passkeyId]) // Each passkey can only have one activation
+  @@map("bot_activations")
+}
+
+// ==================== WALLETS ====================
+
+model Wallet {
+  id            String    @id @default(cuid())
+  userId        Int
+  currency      String
+  network       String
+  privateKey    String?
+  address       String    @unique
+  isActive      Boolean   @default(true)
+  balance       Float     @default(0)
+  nowpaymentsId String?
+  onekeyId      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deposits      Deposit[]
+
+  @@index([address])
+  @@index([userId])
+  @@map("wallets")
+}
+
+model MultiChainWallet {
+  id         String   @id @default(cuid())
+  userId     Int
+  chain      String
+  address    String   @unique
+  publicKey  String
+  privateKey String
+  network    String
+  isActive   Boolean  @default(true)
+  balance    Float    @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([chain])
+  @@index([userId])
+  @@map("multi_chain_wallets")
+}
+
+// ==================== NOTIFICATIONS ====================
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    Int
+  title     String
+  message   String
+  type      String   // deposit, withdrawal, bot_activated, bot_profit, system, security, promotion
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  data      Json?    @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([isRead])
+  @@index([userId])
+  @@index([type])
+  @@map("notifications")
+}
+
+// ==================== ACTIVITY LOGS ====================
+
+model Activity {
+  id        String   @id @default(cuid())
+  userId    Int
+  action    String
+  details   Json     @default("{}")
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([action])
+  @@index([createdAt])
+  @@index([userId])
+  @@map("activities")
+}
+
+// ==================== CHAT & SUPPORT ====================
+
+model ChatMessage {
+  id         String    @id @default(cuid())
+  userId     Int
+  message    String
+  isRead     Boolean   @default(false)
+  readAt     DateTime?
+  senderName String?
+  senderType String    @default("user") // user, admin, bot
+  imageUrl   String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([isRead])
+  @@index([senderType])
+  @@index([userId])
+  @@map("chat_messages")
+}
+
+// ==================== EMAIL VERIFICATION ====================
+
+model EmailVerification {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  verifiedAt DateTime?
+
+  @@index([email])
+  @@index([code])
+  @@map("email_verifications")
+}
+
+// ==================== REFERRALS ====================
+
+model Referral {
+  id          String   @id @default(cuid())
+  referrerId  Int
+  referredId  Int      @unique
+  status      String   @default("pending") // pending, completed, paid
+  bonusAmount Float    @default(0)
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  referrer    User     @relation("ReferralReferrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referred    User     @relation("ReferralReferred", fields: [referredId], references: [id], onDelete: Cascade)
+
+  @@index([referrerId])
+  @@index([status])
+  @@map("referrals")
+}
+
+// ==================== SETTINGS ====================
+
+model Setting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  type        String   @default("string") // string, number, boolean, json
+  description String?
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("settings")
+}
+
+// ==================== API KEYS ====================
+
+model ApiKey {
+  id          String   @id @default(cuid())
+  userId      Int
+  name        String
+  key         String   @unique
+  secret      String
+  permissions String[]
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([key])
+  @@index([userId])
+  @@map("api_keys")
+}
