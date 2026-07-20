@@ -493,7 +493,7 @@ const DepositPage = () => {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({}),
+        body: JSON.stringify({ coin: selectedCoinData?.symbol || 'USDT' }),
       });
 
       const data = await response.json();
