@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -9,7 +9,7 @@ interface LoginFormData {
   password: string;
 }
 
-const LoginPage = () => {
+const LoginForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState<LoginFormData>({
@@ -237,5 +237,11 @@ const LoginPage = () => {
     </div>
   );
 };
+
+const LoginPage = () => (
+  <Suspense>
+    <LoginForm />
+  </Suspense>
+);
 
 export default LoginPage;
