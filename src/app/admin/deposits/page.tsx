@@ -30,6 +30,7 @@ export default function DepositsPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [confirming, setConfirming] = useState<string | null>(null);
   const [confirmModal, setConfirmModal] = useState<Deposit | null>(null);
+  const [actualAmount, setActualAmount] = useState<string>('');
 
   useEffect(() => {
     fetchDeposits();
@@ -58,16 +59,22 @@ export default function DepositsPage() {
   };
 
   const handleConfirmDeposit = async (depositId: string) => {
+    const parsed = parseFloat(actualAmount);
+    if (!actualAmount || isNaN(parsed) || parsed <= 0) {
+      alert('Please enter the actual amount received');
+      return;
+    }
     setConfirming(depositId);
     try {
       const response = await fetch('/api/admin/deposits/confirm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ depositId }),
+        body: JSON.stringify({ depositId, actualAmount: parsed }),
       });
 
       if (response.ok) {
         setConfirmModal(null);
+        setActualAmount('');
         fetchDeposits();
       } else {
         const error = await response.json();
@@ -248,7 +255,7 @@ export default function DepositsPage() {
                     <td className="p-3 text-sm">
                       {deposit.status === 'pending' ? (
                         <button
-                          onClick={() => setConfirmModal(deposit)}
+                          onClick={() => { setConfirmModal(deposit); setActualAmount(''); }}
                           disabled={confirming === deposit.id}
                           className="px-4 py-2 bg-teal-500 text-slate-950 rounded-lg hover:bg-teal-400 transition disabled:opacity-50 font-medium text-xs"
                         >
@@ -286,8 +293,8 @@ export default function DepositsPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-slate-400">Amount</p>
-                  <p className="font-bold text-lg text-teal-400">
+                  <p className="text-sm text-slate-400">Requested Amount</p>
+                  <p className="font-bold text-lg text-slate-400 line-through">
                     {confirmModal.amount} {confirmModal.currency}
                   </p>
                 </div>
@@ -295,6 +302,18 @@ export default function DepositsPage() {
                   <p className="text-sm text-slate-400">Currency</p>
                   <p className="font-medium text-white">{confirmModal.currency}</p>
                 </div>
+              </div>
+              <div>
+                <p className="text-sm text-slate-400 mb-1">Actual Amount Received</p>
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  placeholder="Enter amount actually received"
+                  value={actualAmount}
+                  onChange={(e) => setActualAmount(e.target.value)}
+                  className="w-full bg-slate-800 border border-teal-500/50 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-teal-400"
+                />
               </div>
               <div>
                 <p className="text-sm text-slate-400">Transaction Hash</p>
@@ -306,7 +325,9 @@ export default function DepositsPage() {
 
             <div className="bg-teal-500/10 border border-teal-500/30 rounded-lg p-3 mb-6">
               <p className="text-sm text-teal-400">
-                Once confirmed, {confirmModal.amount} {confirmModal.currency} will be added to the user's balance.
+                {actualAmount && parseFloat(actualAmount) > 0
+                  ? `$${parseFloat(actualAmount).toFixed(2)} ${confirmModal.currency} will be credited to the user's balance.`
+                  : 'Enter the actual amount received above.'}
               </p>
             </div>
 

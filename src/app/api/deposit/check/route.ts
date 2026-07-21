@@ -15,10 +15,7 @@ export async function POST(req: NextRequest) {
 
     const result = await DepositService.checkAndRecordDeposits(address);
 
-    return NextResponse.json({
-      success: true,
-      ...result,
-    });
+    return NextResponse.json({ ...result, success: true });
     
   } catch (error) {
     console.error('Error checking deposits:', error);

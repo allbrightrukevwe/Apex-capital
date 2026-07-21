@@ -1,5 +1,16 @@
 import { prisma } from '@/lib/prisma';
 import { checkAddressForDeposits } from '@/lib/blockchain/tron';
+import nodemailer from 'nodemailer';
+
+const MINIMUM_DEPOSIT = 300;
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: process.env.SMTP_SECURE === 'true',
+  auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+  tls: { rejectUnauthorized: false },
+});
 
 export class DepositService {
   /**
@@ -70,22 +81,87 @@ export class DepositService {
           },
         });
 
-        // Credit user balance
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        const isBelowMinimum = tx.amount < MINIMUM_DEPOSIT;
+
+        // Find the single pending transaction tied to this exact deposit (by reference)
+        const pendingTx = await prisma.transaction.findFirst({
+          where: { userId, status: 'pending', type: 'deposit', reference: deposit.id },
+        });
+
+        // If found by reference, update just that one; otherwise fall back to txHash match
+        if (pendingTx) {
+          await prisma.transaction.update({
+            where: { id: pendingTx.id },
+            data: {
+              amount: tx.amount,
+              description: `Deposit ${tx.amount} ${tx.currency || 'USDT'} via ${tx.network || 'TRC20'}`,
+              status: 'completed',
+              txHash: txHash,
+            },
+          });
+        } else {
+          // Create a new completed transaction record for this confirmed deposit
+          await prisma.transaction.create({
+            data: {
+              userId,
+              type: 'deposit',
+              amount: tx.amount,
+              currency: 'USD',
+              asset: tx.currency || 'USDT',
+              status: 'completed',
+              description: `Deposit ${tx.amount} ${tx.currency || 'USDT'} via ${tx.network || 'TRC20'}`,
+              reference: deposit.id,
+              txHash: txHash,
+            },
+          });
+        }
+
+        // Always credit balance and notify — trading restriction is handled separately
         await prisma.user.update({
           where: { id: userId },
           data: { balance: { increment: tx.amount } },
         });
 
-        // Create notification
         await prisma.notification.create({
           data: {
             userId,
-            title: 'Deposit Received ✅',
-            message: `Your deposit of $${tx.amount} USDT has been confirmed`,
+            title: 'Deposit Confirmed ✅',
+            message: `Your deposit of $${tx.amount} ${tx.currency || 'USDT'} has been confirmed`,
             type: 'DEPOSIT',
             data: { depositId: deposit.id },
           },
         });
+
+        if (isBelowMinimum) {
+          // Notify admin of below-minimum deposit
+          try {
+            await transporter.sendMail({
+              from: `"Apex Capita" <${process.env.SMTP_FROM}>`,
+              to: process.env.SMTP_USER,
+              subject: `Below Minimum Deposit — $${tx.amount} ${tx.currency || 'USDT'} from ${user?.firstName || 'Unknown'} ${user?.lastName || ''}`,
+              html: `
+                <div style="font-family:sans-serif;max-width:480px;margin:0 auto;background:#0f172a;color:#fff;padding:32px;border-radius:16px">
+                  <h2 style="color:#f59e0b;margin-bottom:8px">⚠️ Below Minimum Deposit</h2>
+                  <p style="color:#94a3b8;margin-bottom:16px">A deposit was received but is below the $${MINIMUM_DEPOSIT} minimum.</p>
+                  <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px">
+                    <p style="color:#64748b;font-size:12px;margin:0 0 4px">User</p>
+                    <p style="color:#fff;font-size:14px;margin:0 0 12px">${user?.firstName || 'Unknown'} ${user?.lastName || ''} &lt;${user?.email || 'N/A'}&gt;</p>
+                    <p style="color:#64748b;font-size:12px;margin:0 0 4px">Amount Deposited</p>
+                    <p style="color:#f59e0b;font-size:20px;font-weight:700;margin:0 0 12px">$${tx.amount} ${tx.currency || 'USDT'}</p>
+                    <p style="color:#64748b;font-size:12px;margin:0 0 4px">Minimum Required</p>
+                    <p style="color:#ef4444;font-size:14px;margin:0 0 12px">$${MINIMUM_DEPOSIT}</p>
+                    <p style="color:#64748b;font-size:12px;margin:0 0 4px">TX Hash</p>
+                    <p style="color:#e2e8f0;font-size:12px;font-family:monospace;word-break:break-all;margin:0">${txHash}</p>
+                  </div>
+                  <p style="color:#94a3b8;font-size:12px;margin-top:16px">Balance credited but trading restricted until minimum is met.</p>
+                </div>
+              `,
+            });
+          } catch (emailErr) {
+            console.error('Below-minimum admin email failed:', emailErr);
+          }
+        }
 
         newDeposits.push(deposit);
       }

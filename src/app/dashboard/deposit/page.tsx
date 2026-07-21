@@ -478,8 +478,8 @@ const DepositPage = () => {
   };
 
   const handleGenerateAddress = async () => {
-    if (!amount || parseFloat(amount) < 300) {
-      setError('Minimum deposit is $300');
+    if (!amount || parseFloat(amount) <= 0) {
+      setError('Please enter an amount');
       return;
     }
 
@@ -672,7 +672,7 @@ const DepositPage = () => {
 
   // Step 3: Payment Details
   const renderStep3 = () => {
-    const displayAmount = amount || '300.00';
+    const displayAmount = amount || '0.00';
     const address = generatedAddress?.address || '';
 
     return (
@@ -975,12 +975,12 @@ const DepositPage = () => {
                       <label className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
                         Amount (USD)
                       </label>
-                      <span className="text-teal-400 text-[10px] font-semibold">Min $300</span>
+                      <span className="text-teal-400 text-[10px] font-semibold">Any amount</span>
                     </div>
                     <input
                       type="number"
-                      min="300"
-                      placeholder="300.00"
+                      min="0"
+                      placeholder="0.00"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
                       className="w-full bg-slate-800 border border-slate-700 focus:border-teal-500/50 rounded-lg px-3 py-2.5 text-white text-lg placeholder-slate-600 focus:outline-none transition"
@@ -1014,7 +1014,7 @@ const DepositPage = () => {
                       onClick={handleGenerateAddress}
                       disabled={!amount || parseFloat(amount) < 300 || isGenerating}
                       className={`flex-1 font-bold py-2.5 rounded-lg transition text-xs flex items-center justify-center gap-2 ${
-                        amount && parseFloat(amount) >= 300 && !isGenerating
+                        amount && parseFloat(amount) > 0 && !isGenerating
                           ? 'bg-amber-500 hover:bg-amber-400 text-slate-950'
                           : 'bg-slate-700 disabled:cursor-not-allowed text-slate-500'
                       }`}

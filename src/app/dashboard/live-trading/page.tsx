@@ -349,7 +349,7 @@ const FundedAccounts = () => {
 
 // Main Live Trading Page
 const LiveTradingPage = () => {
-  const { user, loading, refreshUser } = useUserContext();
+  const { user, loading, refresh } = useUserContext();
   const [activeTab, setActiveTab] = useState('live');
   const [selectedSymbol, setSelectedSymbol] = useState('BTC');
   const [lotSize, setLotSize] = useState('0.1');
@@ -408,7 +408,7 @@ const LiveTradingPage = () => {
       setTimeout(() => setTradeSuccess(''), 3000);
       
       // Refresh user context to update balance
-      if (refreshUser) refreshUser();
+      if (refresh) refresh();
     } catch (err: any) {
       setTradeError(err.message || 'Failed to place trade');
       setTimeout(() => setTradeError(''), 5000);

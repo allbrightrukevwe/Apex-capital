@@ -26,8 +26,8 @@ export async function POST(req: NextRequest) {
     const decoded = jwt.verify(token, JWT_SECRET) as { id: number };
     const { amount, currency, network, address, status } = await req.json();
 
-    if (!amount || amount < 50) {
-      return NextResponse.json({ error: 'Minimum deposit amount is $50' }, { status: 400 });
+    if (!amount || amount <= 0) {
+      return NextResponse.json({ error: 'Amount is required' }, { status: 400 });
     }
 
     if (!currency) {

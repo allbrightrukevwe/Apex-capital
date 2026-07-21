@@ -55,8 +55,8 @@ export async function POST(req: NextRequest) {
     // For USDT (and USDC via ERC20) — generate a dynamic Tron address
     if (coin === 'USDT' || coin === 'USDC') {
       const result = await DepositService.generateAddress(decoded.id, decoded.email);
-      if (!result.success) {
-        return NextResponse.json({ success: false, error: result.error }, { status: 400 });
+      if (!result.address) {
+        return NextResponse.json({ success: false, error: 'Failed to generate address' }, { status: 400 });
       }
       const qrCode = await generateQRCodeForAddress(result.address);
       return NextResponse.json({

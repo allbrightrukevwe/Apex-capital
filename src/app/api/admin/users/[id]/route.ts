@@ -15,11 +15,12 @@ function verifyAdmin(req: NextRequest): number | null {
   } catch { return null; }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!verifyAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { firstName, lastName, email, phone, balance, isAdmin, password } = await req.json();
-  const userId = parseInt(params.id);
+  const { id } = await params;
+  const userId = parseInt(id);
 
   const data: any = {};
   if (firstName !== undefined) data.firstName = firstName;
@@ -34,10 +35,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   return NextResponse.json({ success: true });
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!verifyAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const userId = parseInt(params.id);
+  const { id } = await params;
+  const userId = parseInt(id);
   await prisma.user.delete({ where: { id: userId } });
   return NextResponse.json({ success: true });
 }

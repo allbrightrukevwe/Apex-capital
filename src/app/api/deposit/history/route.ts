@@ -15,10 +15,7 @@ export async function GET(req: NextRequest) {
 
     const result = await DepositService.getUserDeposits(userId);
 
-    return NextResponse.json({
-      success: true,
-      ...result,
-    });
+    return NextResponse.json({ ...result, success: true });
     
   } catch (error) {
     console.error('Error fetching deposit history:', error);
