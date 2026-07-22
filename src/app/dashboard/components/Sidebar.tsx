@@ -172,7 +172,7 @@ const Sidebar = () => {
 
   return (
     <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-screen w-64 z-40 bg-slate-900 border-r border-teal-500/10">
-      <div className="flex flex-col h-full overflow-y-auto">
+      <div className="flex flex-col h-full">
         {/* Logo */}
         <div className="px-5 py-4 border-b border-teal-500/10 flex-shrink-0">
           <Link href="/" className="text-base font-bold tracking-wider">

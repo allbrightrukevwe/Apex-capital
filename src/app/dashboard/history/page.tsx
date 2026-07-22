@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import MobileHeader from '../components/MobileHeader';
+import Sidebar from '../components/Sidebar';
 
 // History Header Component
 const HistoryHeader = () => (
@@ -89,7 +90,8 @@ const TransactionHistory = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      <div className="lg:ml-60">
+      <Sidebar />
+      <div className="lg:ml-64">
         <HistoryHeader />
 
         <main className="px-4 py-5 lg:px-6 lg:py-6 max-w-2xl mx-auto">
