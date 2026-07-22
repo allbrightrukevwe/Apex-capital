@@ -335,7 +335,6 @@ const WithdrawPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      <Sidebar />
 
       <div className="lg:ml-60">
         <WithdrawHeader />
