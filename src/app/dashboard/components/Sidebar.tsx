@@ -206,7 +206,7 @@ const Sidebar = () => {
         {/* Bottom Section */}
         <div className="px-2.5 py-3 border-t border-teal-500/10 flex-shrink-0 space-y-0.5">
           <a
-            href="mailto:support@apexcapita.io"
+            href="mailto:supportapexcapitals@gmail.com"
             className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-teal-400 hover:bg-teal-500/8 transition w-full"
           >
             <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2">

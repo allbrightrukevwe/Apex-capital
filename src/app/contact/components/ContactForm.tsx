@@ -185,8 +185,8 @@ const ContactForm = () => {
               </div>
               <div>
                 <p className="text-gray-500 text-xs uppercase tracking-wider mb-0.5">Email</p>
-                <a href="mailto:support@apexcapita.com" className="text-teal-400 hover:text-teal-300 text-sm font-semibold transition">
-                  support@apexcapita.com
+                <a href="mailto:supportapexcapitals@gmail.com" className="text-teal-400 hover:text-teal-300 text-sm font-semibold transition">
+                  supportapexcapitals@gmail.com
                 </a>
               </div>
             </div>
