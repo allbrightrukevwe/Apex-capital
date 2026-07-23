@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ReactElement } from 'react';
 import Link from 'next/link';
 import MobileHeader from '../components/MobileHeader';
 import Sidebar from '../components/Sidebar';
 
-const typeIcon: Record<string, JSX.Element> = {
+const typeIcon: Record<string, ReactElement> = {
   deposit: (
     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M12 3v13M5 14l7 7 7-7" /><path d="M3 21h18" />
