@@ -375,11 +375,9 @@ const DepositPage = () => {
     setError('');
 
     try {
-      const response = await fetch('/api/deposit/check', {
+      const response = await fetch('/api/deposit/verify-tx', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
           txHash: txnId,
@@ -389,15 +387,15 @@ const DepositPage = () => {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit transaction');
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to verify transaction');
       }
 
-      alert('✅ Transaction submitted successfully! We will confirm your deposit shortly.');
+      alert(`✅ Transaction verified! $${data.amount} ${data.currency} has been credited to your account.`);
       router.push('/dashboard/history');
 
     } catch (err: any) {
-      setError(err.message || 'Failed to submit transaction');
+      setError(err.message || 'Failed to verify transaction');
     } finally {
       setIsLoading(false);
     }
@@ -599,7 +597,7 @@ const DepositPage = () => {
 
           <div className="px-4 py-3">
             <label className="text-slate-400 text-[10px] font-bold uppercase tracking-widest block mb-2">
-              Already sent? Confirm manually (optional)
+              Already sent? Verify your transaction hash
             </label>
             <div className="flex gap-2">
               <input
@@ -623,12 +621,12 @@ const DepositPage = () => {
                     <circle cx="12" cy="12" r="10" strokeDasharray="30 20" />
                   </svg>
                 ) : (
-                  'Check Now'
+                  'Verify & Credit'
                 )}
               </button>
             </div>
             <p className="text-slate-600 text-[10px] mt-1.5">
-              We automatically check every few seconds — this button just checks immediately.
+              We verify your transaction on-chain before crediting your balance.
             </p>
           </div>
         </div>

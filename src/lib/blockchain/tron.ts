@@ -138,5 +138,43 @@ export async function checkAddressForDeposits(address: string) {
   }
 }
 
+export async function verifyTxHash(txHash: string, expectedAddress: string) {
+  try {
+    if (!txHash || !API_KEY) return { valid: false, error: 'Missing tx hash or API key' };
+
+    const baseUrl = API_URLS[NETWORK] || API_URLS.nile;
+    const url = `${baseUrl}/v1/transactions/${txHash}/events`;
+
+    const response = await fetch(url, {
+      headers: { 'TRON-PRO-API-KEY': API_KEY },
+      cache: 'no-store',
+    });
+
+    if (!response.ok) return { valid: false, error: `TronGrid error: ${response.status}` };
+
+    const data = await response.json();
+    if (!data.data || data.data.length === 0) return { valid: false, error: 'Transaction not found' };
+
+    // Look for a Transfer event to the expected address
+    const usdtContract = NETWORK === 'mainnet'
+      ? 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'
+      : 'TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj';
+
+    for (const event of data.data) {
+      if (event.contract_address !== usdtContract) continue;
+      const toAddr = event.result?.to ? tronWeb.address.fromHex(event.result.to) : null;
+      if (!toAddr || toAddr !== expectedAddress) continue;
+      const amount = parseFloat(event.result?.value || '0') / 1e6;
+      if (amount <= 0) continue;
+      return { valid: true, amount, currency: 'USDT', network: NETWORK, txHash };
+    }
+
+    return { valid: false, error: 'No matching USDT transfer to your address found in this transaction' };
+  } catch (error) {
+    console.error('Error verifying tx hash:', error);
+    return { valid: false, error: 'Failed to verify transaction' };
+  }
+}
+
 export { tronWeb };
 export default tronWeb;
