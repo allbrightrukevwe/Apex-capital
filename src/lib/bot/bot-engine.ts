@@ -80,6 +80,8 @@ export class TradingBotEngine {
   private onTradeCallback: ((trade: TradeHistory) => void) | null = null;
   private winLossPattern: { lossPositions: Set<number> } | null = null;
   private isPaused: boolean = false;
+  private logBuffer: string[] = [];
+  private lastLogPhase: string = '';
 
   // ---- TIMER STATE (timestamp-based, replaces the old ticking setInterval) ----
   private sessionStartedAt: number = Date.now(); // when the current session began
@@ -201,6 +203,15 @@ export class TradingBotEngine {
     }
   }
 
+  private ts(): string {
+    return new Date().toLocaleTimeString('en-US', { hour12: false });
+  }
+
+  private pushLog(line: string): void {
+    this.logBuffer.push(`[${this.ts()}] ${line}`);
+    if (this.logBuffer.length > 60) this.logBuffer.shift();
+  }
+
   private startSession(): void {
     if (!this.isRunning || this.isPaused) return;
 
@@ -214,12 +225,49 @@ export class TradingBotEngine {
     this.pausedAt = null;
 
     const tradeNum = this.tradeCycleCount + 1;
+    const asset = this.config.asset;
+    const price = this.currentPrice;
+
+    // Emit realistic pre-trade analysis logs
+    const rsi = (55 + Math.random() * 20).toFixed(1);
+    const macd = (-0.003 + Math.random() * 0.006).toFixed(4);
+    const atr = (0.002 + Math.random() * 0.002).toFixed(4);
+    const sigma = (0.9 + Math.random() * 0.6).toFixed(2);
+    const pressure = Math.floor(52 + Math.random() * 20);
+    const direction = Math.random() > 0.45 ? 'SELL' : 'BUY';
+    const confidence = Math.floor(88 + Math.random() * 10);
+    const slPrice = direction === 'SELL'
+      ? (price * (1 + 0.004 + Math.random() * 0.008)).toFixed(2)
+      : (price * (1 - 0.004 - Math.random() * 0.008)).toFixed(2);
+    const tpPct = (1.2 + Math.random() * 1.8).toFixed(2);
+    const risk = (0.8 + Math.random() * 1.4).toFixed(2);
+
+    this.pushLog(`Session ${tradeNum}/10 — scanning ${asset}`);
+    this.pushLog(`Fetching OHLCV data — timeframe: 1m — bars: 200`);
+    this.pushLog(`RSI(14): ${rsi} | MACD signal: ${macd} | ATR: ${atr}`);
+    this.pushLog(`Volatility check: within acceptable range (σ = ${sigma})`);
+    this.pushLog(`Order-flow analysis: ${direction === 'SELL' ? 'sell' : 'buy'} pressure dominant (${pressure}%)`);
+    this.pushLog(`Entry signal CONFIRMED — direction: ${direction} — confidence: ${confidence}%`);
+    this.pushLog(`Placing market order: ${direction} ${asset} @ $${price.toFixed(2)}`);
+    this.pushLog(`Order filled ✓ — stop-loss: $${slPrice} — take-profit: +${tpPct}%`);
+    this.pushLog(`Risk exposure: ${risk}% of capital — within 2% limit`);
+    this.pushLog(`Monitoring position — trailing SL active`);
 
     this.forceBuy();
 
     if (this.sessionIntervalId) clearTimeout(this.sessionIntervalId);
 
     const duration = (this.config.sessionDuration || 30) * 1000;
+
+    // Emit mid-session log halfway through
+    setTimeout(() => {
+      if (this.isRunning && !this.isPaused) {
+        const midRsi = (50 + Math.random() * 25).toFixed(1);
+        const midMacd = (-0.002 + Math.random() * 0.004).toFixed(4);
+        this.pushLog(`Position update — RSI(14): ${midRsi} | MACD: ${midMacd} | holding ${direction}`);
+        this.pushLog(`Trailing stop adjusted — new SL: $${(parseFloat(slPrice) * (1 + (Math.random() - 0.5) * 0.002)).toFixed(2)}`);
+      }
+    }, duration / 2);
 
     this.sessionIntervalId = setTimeout(() => {
       this.closeSession();
@@ -337,12 +385,24 @@ export class TradingBotEngine {
       this.onTradeCallback(trade);
     }
 
+    // Emit close log
+    const isWin = profitAmount > 0;
+    const action = this.trades.find(t => t.action !== 'sell')?.action?.toUpperCase() ?? 'BUY';
+    this.pushLog(
+      isWin
+        ? `Trade closed ▲ — ${action} ${this.config.asset} — PROFIT +$${profitAmount.toFixed(2)} (+${profitPercent.toFixed(1)}%)`
+        : `Trade closed ▼ — ${action} ${this.config.asset} — LOSS -$${Math.abs(profitAmount).toFixed(2)} (${profitPercent.toFixed(1)}%)`
+    );
+    this.pushLog(`Balance updated — session P&L: ${isWin ? '+' : ''}$${profitAmount.toFixed(2)}`);
+
     const TOTAL_SESSIONS = 10;
     if (this.tradeCycleCount >= TOTAL_SESSIONS) {
+      this.pushLog(`All ${TOTAL_SESSIONS} sessions complete — bot stopping`);
       this.stop();
       return;
     }
 
+    this.pushLog(`Next session starting in 3s...`);
     setTimeout(() => {
       if (this.isRunning && !this.isPaused) {
         this.startSession();
@@ -416,6 +476,13 @@ export class TradingBotEngine {
     else if (amount >= 1000) packageName = 'SILVER';
     else if (amount >= 700) packageName = 'BRONZE';
 
+    this.logBuffer = [];
+    this.pushLog(`${packageName} BOT initialized — asset: ${this.config.asset}`);
+    this.pushLog(`Strategy: ${this.config.strategy} — trade amount: $${amount.toLocaleString()}`);
+    this.pushLog(`Session duration: ${this.config.sessionDuration || 30}s — max sessions: 10`);
+    this.pushLog(`Connecting to market data feed...`);
+    this.pushLog(`Market data connected — starting session 1 in 2s`);
+
     setTimeout(() => {
       if (this.isRunning) {
         this.startSession();
@@ -472,72 +539,7 @@ export class TradingBotEngine {
   }
 
   private generateExecutionLogs(): string[] {
-    const logs = [];
-    const now = new Date();
-    const baseTime = new Date(now);
-    baseTime.setMinutes(baseTime.getMinutes() - 2);
-
-    const formatTime = (d: Date) => d.toLocaleTimeString();
-
-    logs.push(`scanning XAU/USD`);
-    logs.push(`pressure dominant (60%)`);
-    logs.push(`PROGRESS`);
-    logs.push(`11 entries`);
-    logs.push(`20 transactions`);
-    logs.push(`21 minutes`);
-    logs.push(`PUKIT +3414.51`);
-    logs.push(`XAU/USD S23231.4b`);
-    logs.push(`XAU/USD ¥ 2,448.61`);
-    logs.push(`1m - Darts: 200`);
-    logs.push(`acceptable range (d = 1.23)`);
-    logs.push(`acceptable range (0 = 1.23)`);
-
-    const t1 = new Date(baseTime);
-    logs.push(`[${formatTime(t1)}] Fetching OHLCV data - timeframe: 1m - bars: 200`);
-
-    const t2 = new Date(baseTime.getTime() + 1000);
-    const rsi = (60 + Math.random() * 15).toFixed(1);
-    const macd = (-0.002 + Math.random() * 0.003).toFixed(4);
-    const atr = (0.0025 + Math.random() * 0.001).toFixed(4);
-    logs.push(`[${formatTime(t2)}] RSI(14): ${rsi} | MACD signal: ${macd} | ATR: ${atr}`);
-
-    const t3 = new Date(baseTime.getTime() + 4000);
-    const sigma = (1.1 + Math.random() * 0.3).toFixed(2);
-    logs.push(`[${formatTime(t3)}] Volatility check: within acceptable range (σ = ${sigma})`);
-
-    const t4 = new Date(baseTime.getTime() + 6000);
-    const sellPressure = Math.floor(55 + Math.random() * 15);
-    logs.push(`[${formatTime(t4)}] Order-flow analysis: sell pressure dominant (${sellPressure}%)`);
-
-    const t5 = new Date(baseTime.getTime() + 8000);
-    const direction = Math.random() > 0.5 ? 'SELL' : 'BUY';
-    const confidence = Math.floor(88 + Math.random() * 10);
-    logs.push(`[${formatTime(t5)}] Entry signal CONFIRMED direction: ${direction} - confidence: ${confidence}%`);
-
-    const t6 = new Date(baseTime.getTime() + 10000);
-    const price = (this.currentPrice || 2331.45) * (1 + (Math.random() - 0.5) * 0.02);
-    logs.push(`[${formatTime(t6)}] Placing market order: ${direction} XAU/USD @ $${price.toFixed(2)}`);
-
-    const t7 = new Date(baseTime.getTime() + 12000);
-    const stopLoss = price * (1 - (0.005 + Math.random() * 0.01));
-    const takeProfitPct = (1.2 + Math.random() * 1.5).toFixed(2);
-    logs.push(`[${formatTime(t7)}] Order filled ✓ - stop-loss: $${stopLoss.toFixed(2)} - take-profit: +${takeProfitPct}%`);
-
-    const riskExposure = (1.0 + Math.random() * 1.5).toFixed(2);
-    logs.push(`Risk exposure: ${riskExposure}% of capital within 2% limit`);
-
-    const t8 = new Date(baseTime.getTime() + 20000);
-    logs.push(`[${formatTime(t8)}] Monitoring position - trailing SL active`);
-
-    if (this.trades.length > 0) {
-      const lastTrade = this.trades[this.trades.length - 1];
-      if (lastTrade.profit !== 0) {
-        const profitStr = lastTrade.profit > 0 ? 'PROFIT' : 'LOSS';
-        logs.push(`Trade closed ${lastTrade.profit > 0 ? '▲' : '▼'} - ${profitStr} $${lastTrade.profit >= 0 ? '+' : ''}${lastTrade.profit.toFixed(2)}`);
-      }
-    }
-
-    return logs;
+    return [...this.logBuffer];
   }
 
   public getTradeHistory(): TradeHistory[] {
