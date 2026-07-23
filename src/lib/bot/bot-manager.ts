@@ -47,20 +47,6 @@ export async function startBotInstance(botId: string, config: BotInstanceConfig)
     return;
   }
 
-  const user = await prisma.user.findUnique({ where: { id: config.userId } });
-  if (!user) {
-    return;
-  }
-
-  if (user.balance < config.tradeAmount) {
-    return;
-  }
-
-  await prisma.user.update({
-    where: { id: config.userId },
-    data: { balance: { decrement: config.tradeAmount } },
-  });
-
   const priceFeed = getSimplePriceFeed();
   const engine = new TradingBotEngine(config, priceFeed);
 

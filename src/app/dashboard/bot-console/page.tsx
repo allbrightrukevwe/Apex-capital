@@ -133,14 +133,14 @@ const BotConsolePage = () => {
       if (data.bot) {
         const bot = data.bot;
         const realtime = bot.realtimeStatus || bot;
-        const stats = realtime.stats || bot.stats || {};
-        const trades = realtime.recentTrades || bot.recentTrades || [];
-        const logs = realtime.logs || bot.logs || [];
-        const pair = realtime.pair || bot.pair || bot.tradingPair || 'XAU/USD';
-        const session = realtime.session || bot.session || 'Session 0/10';
-        const confidence = realtime.confidence || bot.confidence || 70;
-        const isPaused = realtime.isPaused || bot.isPaused || false;
-        const isRunning = realtime.isRunning || realtime.botStatus === 'running' || bot.status === 'running';
+        const stats = realtime.stats || {};
+        const trades = realtime.recentTrades || [];
+        const logs = realtime.logs || [];
+        const pair = realtime.pair || bot.tradingPair || 'XAU/USD';
+        const session = realtime.session || 'Session 0/10';
+        const confidence = realtime.confidence || 70;
+        const isPaused = realtime.isPaused || false;
+        const isRunning = realtime.isRunning || realtime.botStatus === 'running' || realtime.status === 'running';
         const backendTimer = realtime.timer ?? null;
 
         const newStatus = {
