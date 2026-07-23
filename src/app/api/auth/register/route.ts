@@ -78,7 +78,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, requiresVerification: true, email }, { status: 201 });
   } catch (error: any) {
-    console.error("Registration error:", error);
     return NextResponse.json({ success: false, error: error.message || "Internal server error" }, { status: 500 });
   }
 }

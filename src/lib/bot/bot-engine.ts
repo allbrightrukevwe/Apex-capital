@@ -132,7 +132,6 @@ export class TradingBotEngine {
       clearTimeout(this.sessionIntervalId);
       this.sessionIntervalId = null;
     }
-    console.log('⏸️ Bot paused');
   }
 
   public resume(): void {
@@ -153,8 +152,6 @@ export class TradingBotEngine {
     this.sessionIntervalId = setTimeout(() => {
       this.closeSession();
     }, remaining);
-
-    console.log('▶️ Bot resumed');
   }
 
   /**
@@ -200,10 +197,7 @@ export class TradingBotEngine {
     const wins = 10 - numLosses;
     const winRate = wins * 10;
     const lossArray = Array.from(lossPositions).sort((a, b) => a - b);
-    console.log(`📊 Package: $${amount} | Win Rate: ${winRate}% (${wins} wins, ${numLosses} losses)`);
-    console.log(`📊 Sessions 1 & 2: Always WIN ✅`);
     if (numLosses > 0) {
-      console.log(`📊 Losses at sessions: ${lossArray.join(', ')}`);
     }
   }
 
@@ -220,11 +214,6 @@ export class TradingBotEngine {
     this.pausedAt = null;
 
     const tradeNum = this.tradeCycleCount + 1;
-    console.log(`\n⏰ =========================================`);
-    console.log(`⏰ SESSION #${tradeNum} STARTED`);
-    console.log(`⏰ Duration: ${this.config.sessionDuration || 30} seconds`);
-    console.log(`⏰ Amount: $${this.config.tradeAmount.toLocaleString()}`);
-    console.log(`⏰ =========================================\n`);
 
     this.forceBuy();
 
@@ -262,8 +251,6 @@ export class TradingBotEngine {
     this.entryPrice = currentPrice;
     this.entryTime = new Date();
     this.dailyTrades++;
-
-    console.log(`🟢 ${action.toUpperCase()} #${this.tradeCycleCount + 1} | ${this.config.asset} | $${currentPrice.toFixed(2)} | Amount: $${this.config.tradeAmount.toLocaleString()}`);
   }
 
   // ✅ Package-based profit/loss percentages
@@ -292,7 +279,6 @@ export class TradingBotEngine {
 
       profitAmount = -(amount * lossPercent);
       profitPercent = -lossPercent * 100;
-      console.log(`❌ LOSS: ${(lossPercent * 100).toFixed(2)}% = -$${Math.abs(profitAmount).toFixed(2)}`);
       this.lossCount++;
     } else {
       // ✅ WIN % based on package
@@ -304,14 +290,12 @@ export class TradingBotEngine {
 
       profitAmount = amount * winPercent;
       profitPercent = winPercent * 100;
-      console.log(`✅ WIN: ${(winPercent * 100).toFixed(2)}% = +$${profitAmount.toFixed(2)}`);
     }
 
     // ✅ GUARANTEE profit is never 0
     if (profitAmount === 0 || Math.abs(profitAmount) < 0.01) {
       profitAmount = isLoss ? -(amount * 0.12) : (amount * 0.35);
       profitPercent = isLoss ? -12 : 35;
-      console.log(`⚠️ Profit was 0, using default: $${profitAmount.toFixed(2)}`);
     }
 
     this.tradeCycleCount++;
@@ -341,17 +325,9 @@ export class TradingBotEngine {
 
     this.sessionProfit = profitAmount;
     this.dailyLoss += profitAmount;
-
-    console.log(`\n💰💰💰💰💰💰💰💰💰💰💰💰💰💰`);
-    console.log(`💰 SESSION #${this.tradeCycleCount} COMPLETE`);
     if (profitAmount > 0) {
-      console.log(`💰 ✅ PROFIT: +$${profitAmount.toFixed(2)} (${profitPercent.toFixed(1)}%)`);
     } else {
-      console.log(`💰 ❌ LOSS: $${profitAmount.toFixed(2)} (${profitPercent.toFixed(1)}%)`);
     }
-    console.log(`💰 Buy: $${entryPrice.toFixed(2)} → Sell: $${currentPrice.toFixed(2)}`);
-    console.log(`💰 Amount: $${amount.toLocaleString()}`);
-    console.log(`💰💰💰💰💰💰💰💰💰💰💰💰💰💰\n`);
 
     if (this.onProfitCallback) {
       this.onProfitCallback(profitAmount, currentPrice, entryPrice);
@@ -363,14 +339,12 @@ export class TradingBotEngine {
 
     const TOTAL_SESSIONS = 10;
     if (this.tradeCycleCount >= TOTAL_SESSIONS) {
-      console.log(`\n🏁 All ${TOTAL_SESSIONS} sessions complete. Bot stopping.\n`);
       this.stop();
       return;
     }
 
     setTimeout(() => {
       if (this.isRunning && !this.isPaused) {
-        console.log(`🔄 Preparing next session...\n`);
         this.startSession();
       }
     }, 3000);
@@ -442,15 +416,6 @@ export class TradingBotEngine {
     else if (amount >= 1000) packageName = 'SILVER';
     else if (amount >= 700) packageName = 'BRONZE';
 
-    console.log(`\n🤖 Bot "${this.config.name}" started!`);
-    console.log(`📊 Package: ${packageName} ($${amount})`);
-    console.log(`📊 Trading Rules:`);
-    console.log(`   ✅ Sessions 1 & 2: Always WIN`);
-    console.log(`   ✅ Win/Loss based on package tier`);
-    console.log(`💰 Trade Amount: $${amount.toLocaleString()}`);
-    console.log(`⏰ Session Duration: ${this.config.sessionDuration || 30} seconds`);
-    console.log(`📈 Total Sessions: 10 per cycle\n`);
-
     setTimeout(() => {
       if (this.isRunning) {
         this.startSession();
@@ -462,7 +427,6 @@ export class TradingBotEngine {
     if (this.isRunning) return;
     this.isRunning = true;
     this.startSession();
-    console.log(`🤖 Bot "${this.config.name}" started (SIMULATION)`);
   }
 
   public stop(): void {
@@ -470,7 +434,6 @@ export class TradingBotEngine {
     if (this.sessionIntervalId) clearTimeout(this.sessionIntervalId);
     if (this.intervalId) clearInterval(this.intervalId);
     if (this.unsubscribePrice) this.unsubscribePrice();
-    console.log(`\n🛑 Bot "${this.config.name}" stopped after ${this.tradeCycleCount} sessions\n`);
   }
 
   public getStatus() {

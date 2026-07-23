@@ -30,8 +30,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           credentials: 'include',
         });
         
-        console.log('🔍 Admin verify status:', res.status);
-        
         if (res.status === 401) { 
           router.push("/login"); 
           return; 
@@ -42,7 +40,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }
         if (res.ok) {
           const data = await res.json();
-          console.log('🔍 Admin verify data:', data);
           if (data.isAdmin) { 
             setIsAdmin(true); 
             setLoading(false); 
@@ -51,7 +48,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }
         router.push("/dashboard");
       } catch (error) {
-        console.error('Admin verify error:', error);
         router.push("/login");
       }
     };

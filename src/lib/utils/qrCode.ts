@@ -13,7 +13,6 @@ export async function generateQRCode(address: string): Promise<string> {
     });
     return qrCodeDataUrl;
   } catch (error) {
-    console.error('Error generating QR code:', error);
     throw new Error('Failed to generate QR code');
   }
 }

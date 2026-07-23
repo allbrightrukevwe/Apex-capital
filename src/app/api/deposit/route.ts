@@ -131,7 +131,6 @@ export async function POST(req: NextRequest) {
           `,
         });
       } catch (emailErr) {
-        console.error('Deposit user email failed:', emailErr);
       }
 
       // Notify admin
@@ -159,7 +158,6 @@ export async function POST(req: NextRequest) {
           `,
         });
       } catch (emailErr) {
-        console.error('Deposit admin email failed:', emailErr);
       }
     }
 
@@ -172,7 +170,6 @@ export async function POST(req: NextRequest) {
       address: deposit.toAddress,
     });
   } catch (error) {
-    console.error('Error creating deposit:', error);
     return NextResponse.json({ error: 'Failed to create deposit' }, { status: 500 });
   }
 }

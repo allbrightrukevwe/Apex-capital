@@ -10,13 +10,13 @@ export async function GET(req: NextRequest) {
     if (!token) return NextResponse.json({ error: 'No token' }, { status: 401 });
 
     const decoded = jwt.verify(token, JWT_SECRET) as any;
-    console.log('🔍 DECODED TOKEN:', decoded); // ✅ Add this
-    console.log('🔍 isAdmin from token:', decoded.isAdmin); // ✅ Add this
+ // ✅ Add this
+ // ✅ Add this
     
     const userId = decoded.id || decoded.userId;
 
     const user = await prisma.user.findUnique({ where: { id: userId }, select: { isAdmin: true } });
-    console.log('🔍 isAdmin from DB:', user?.isAdmin); // ✅ Add this
+ // ✅ Add this
     
     if (!user?.isAdmin) return NextResponse.json({ error: 'Not admin' }, { status: 403 });
 

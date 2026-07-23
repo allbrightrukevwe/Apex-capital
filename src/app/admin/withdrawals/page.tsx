@@ -52,7 +52,6 @@ export default function AdminWithdrawals() {
         setWithdrawals(data.withdrawals);
       }
     } catch (error) {
-      console.error("Failed to fetch withdrawals:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -79,7 +78,6 @@ export default function AdminWithdrawals() {
         setTransactionHash("");
       }
     } catch (error) {
-      console.error("Failed to update withdrawal:", error);
     } finally {
       setProcessingId(null);
     }

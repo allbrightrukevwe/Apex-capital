@@ -72,7 +72,6 @@ export async function GET(req: NextRequest) {
       summary,
     });
   } catch (error: any) {
-    console.error('Get transactions error:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to get transactions' },
       { status: 500 }

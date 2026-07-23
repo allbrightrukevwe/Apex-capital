@@ -33,7 +33,6 @@ globalForBots.__pausedBots = pausedBots;
 
 export async function startBotInstance(botId: string, config: BotInstanceConfig): Promise<void> {
   if (activeBots.has(botId)) {
-    console.log(`Bot ${botId} is already running`);
     return;
   }
 
@@ -45,18 +44,15 @@ export async function startBotInstance(botId: string, config: BotInstanceConfig)
   });
 
   if (bot?.isDeleted) {
-    console.log(`❌ Cannot start bot ${databaseBotId} - Bot has been deleted`);
     return;
   }
 
   const user = await prisma.user.findUnique({ where: { id: config.userId } });
   if (!user) {
-    console.log(`❌ User not found: ${config.userId}`);
     return;
   }
 
   if (user.balance < config.tradeAmount) {
-    console.log(`❌ Insufficient balance. Have: $${user.balance}, Need: $${config.tradeAmount}`);
     return;
   }
 
@@ -96,8 +92,6 @@ export async function startBotInstance(botId: string, config: BotInstanceConfig)
         },
       });
 
-      console.log(`💾 Trade saved: SELL | Profit: $${(trade.profit || 0).toFixed(2)}`);
-
       const user = await prisma.user.findUnique({ where: { id: config.userId } });
       if (user) {
         const newBalance = Math.round((user.balance + (trade.profit || 0)) * 100) / 100;
@@ -123,14 +117,11 @@ export async function startBotInstance(botId: string, config: BotInstanceConfig)
             completedAt: new Date(),
           },
         });
-
-        console.log(`💰 Balance: $${user.balance.toFixed(2)} → $${newBalance.toFixed(2)}`);
       }
 
       // Check if all 10 sessions are done — stop the bot in DB
       const completedSells = engine.getTradeHistory().filter(t => t.action === 'sell' && Math.abs(t.profit) > 0.01);
       if (completedSells.length >= 10) {
-        console.log(`🏁 10 sessions complete — stopping bot ${databaseBotId} in DB`);
         activeBots.delete(botId);
         pausedBots.delete(botId);
         try {
@@ -138,7 +129,6 @@ export async function startBotInstance(botId: string, config: BotInstanceConfig)
         } catch (e) {}
       }
     } catch (error) {
-      console.error('Failed to save trade:', error);
     }
   });
 

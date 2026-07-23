@@ -56,7 +56,6 @@ export default function AdminTransactions() {
         setTotalPages(data.pages || 1);
       }
     } catch (error) {
-      console.error("Failed to fetch transactions:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);

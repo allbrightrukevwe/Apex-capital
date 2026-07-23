@@ -42,7 +42,6 @@ export default function AdminWalletsPage() {
         setWallets(safeWallets);
       }
     } catch (error) {
-      console.error('Error fetching wallets:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);

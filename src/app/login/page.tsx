@@ -79,8 +79,6 @@ const LoginForm = () => {
         localStorage.setItem('user_balance', data.user.balance?.toString() || '0');
       }
 
-      console.log('🔑 Login success - isAdmin:', data.user.isAdmin);
-
       // ✅ Redirect based on admin status
       if (data.user.isAdmin) {
         router.push('/admin');

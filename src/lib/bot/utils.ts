@@ -134,19 +134,12 @@ export async function createBotActivation(
       },
     });
 
-    console.log(`✅ Bot activated successfully: ${bot.id} for user ${userId}`);
-    console.log(`   Package: ${botPackage.name}`);
-    console.log(`   Trading Pair: ${tradingPair}`);
-    console.log(`   Amount: $${amount}`);
-    console.log(`   Session: ${sessionDuration}`);
-
     return {
       activation,
       bot,
     };
 
   } catch (error) {
-    console.error('Error creating bot activation:', error);
     throw error;
   }
 }

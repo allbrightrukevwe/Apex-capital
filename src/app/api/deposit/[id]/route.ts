@@ -64,7 +64,6 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
       }
     });
   } catch (error) {
-    console.error('Error fetching deposit:', error);
     return NextResponse.json({ error: 'Failed to fetch deposit' }, { status: 500 });
   }
 }

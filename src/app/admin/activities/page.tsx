@@ -46,7 +46,6 @@ export default function AdminActivitiesPage() {
         setActivities(data.activities || []);
       }
     } catch (error) {
-      console.error("Failed to fetch activities:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);

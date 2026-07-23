@@ -112,7 +112,6 @@ export async function POST(req: NextRequest) {
       withdrawal: { id: withdrawal.id, amount: withdrawAmount, coin: currency, status: 'pending' },
     });
   } catch (error: any) {
-    console.error('Withdrawal error:', error);
     return NextResponse.json({ error: error.message || 'Failed to process withdrawal' }, { status: 500 });
   }
 }
@@ -135,7 +134,6 @@ export async function GET(req: NextRequest) {
       withdrawals,
     });
   } catch (error: any) {
-    console.error('Get withdrawals error:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to get withdrawals' },
       { status: 500 }

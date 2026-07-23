@@ -74,7 +74,6 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('Error fetching bot:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -159,7 +158,6 @@ export async function PUT(
       },
     });
   } catch (error) {
-    console.error('Error updating bot:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -234,7 +232,6 @@ export async function DELETE(
       },
     });
   } catch (error) {
-    console.error('Error deleting bot:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

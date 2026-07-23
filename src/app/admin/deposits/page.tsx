@@ -46,7 +46,6 @@ export default function DepositsPage() {
         setDeposits(data.data || []);
       }
     } catch (error) {
-      console.error('Error fetching deposits:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -81,7 +80,6 @@ export default function DepositsPage() {
         alert(`Error: ${error.error}`);
       }
     } catch (error) {
-      console.error('Error confirming deposit:', error);
       alert('Failed to confirm deposit');
     } finally {
       setConfirming(null);

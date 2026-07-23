@@ -76,12 +76,10 @@ export async function POST(req: NextRequest) {
         `,
       });
     } catch (emailErr) {
-      console.error('Admin notification email failed:', emailErr);
     }
 
     return NextResponse.json({ success: true, message: 'Message sent', data: chatMessage }, { status: 201 });
   } catch (error: any) {
-    console.error('Send message error:', error);
     return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
   }
 }

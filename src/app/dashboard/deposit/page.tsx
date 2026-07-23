@@ -258,7 +258,6 @@ const DepositPage = () => {
           router.push('/dashboard/history');
         }
       } catch (err) {
-        console.error('Auto-check polling error:', err);
       } finally {
         setIsAutoChecking(false);
       }
@@ -349,7 +348,6 @@ const DepositPage = () => {
       const depositData = await depositResponse.json();
 
       if (!depositResponse.ok) {
-        console.error('Failed to create deposit record:', depositData);
       }
 
       setDepositDetected(false);
@@ -359,7 +357,6 @@ const DepositPage = () => {
 
     } catch (err: any) {
       setError(err.message || 'Failed to generate address');
-      console.error('Generate address error:', err);
     } finally {
       setIsGenerating(false);
     }
@@ -456,7 +453,6 @@ const DepositPage = () => {
             alt="QR Code" 
             className="w-32 h-32"
             onError={(e) => {
-               console.error('QR Code image failed to load');
               (e.target as HTMLImageElement).style.display = 'none';
             }}
           />
@@ -473,7 +469,6 @@ const DepositPage = () => {
             alt="QR Code"
             className="w-32 h-32"
             onError={(e) => {
-              console.error('QR Code API failed, using fallback');
               (e.target as HTMLImageElement).style.display = 'none';
             }}
           />

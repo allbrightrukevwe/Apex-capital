@@ -108,7 +108,6 @@ export async function POST(request: NextRequest) {
       testPasskey: passkey.key,
     });
   } catch (error: any) {
-    console.error('Error creating packages:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to create packages' },
       { status: 500 }

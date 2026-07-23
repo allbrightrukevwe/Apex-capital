@@ -214,7 +214,6 @@ const BotConsolePage = () => {
         }
       }
     } catch (err) {
-      console.error('Poll error:', err);
     }
   }, []);
 

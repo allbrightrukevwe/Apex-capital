@@ -101,7 +101,6 @@ export default function ChatWidget() {
         setToken(null);
       }
     } catch (error) {
-      console.error('Error fetching messages:', error);
     }
   };
 
@@ -158,7 +157,6 @@ export default function ChatWidget() {
         alert(error.error || 'Failed to send message');
       }
     } catch (error) {
-      console.error('Error sending message:', error);
       alert('Error sending message');
     } finally {
       setIsLoading(false);

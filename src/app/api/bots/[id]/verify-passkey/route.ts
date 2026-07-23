@@ -63,11 +63,6 @@ export async function POST(
       );
     }
 
-    // Log for debugging
-    console.log('🔍 Verifying passkey for package:', id);
-    console.log('🔑 Passkey:', passkey);
-    console.log('👤 User ID:', userId);
-
     // Find the user
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -86,14 +81,11 @@ export async function POST(
     });
 
     if (!botPackage) {
-      console.error('❌ Bot package not found for ID:', id);
       return NextResponse.json(
         { error: 'Bot package not found' },
         { status: 404 }
       );
     }
-
-    console.log('✅ Bot package found:', botPackage.name);
 
     // Check balance
     const tradeAmount = parseFloat(amount) || botPackage.price || 300;
@@ -126,7 +118,6 @@ if (!passkeyRecord) {
   const isGenerated = /^trade\d{3}$/.test(passkey);
   if (VALID_PASSKEYS.includes(passkey) || isGenerated) {
     isHardcoded = true;
-    console.log('✅ Using passkey:', passkey);
 
     const uniqueKey = `${passkey}-${user.id}-${Date.now()}`;
 
@@ -173,8 +164,6 @@ if (!passkeyRecord) {
       data: { balance: { decrement: tradeAmount } },
     });
 
-    console.log(`💰 Balance deducted: $${tradeAmount}`);
-
     // Mark passkey as used (if not already marked)
     if (!isHardcoded) {
       await prisma.passkey.update({
@@ -219,8 +208,6 @@ if (!passkeyRecord) {
       },
     });
 
-    console.log(`✅ Bot created: ${bot.id}`);
-
     // Create bot activation record
     const botActivation = await prisma.botActivation.create({
       data: {
@@ -234,8 +221,6 @@ if (!passkeyRecord) {
         settings: bot.settings as object,
       },
     });
-
-    console.log(`✅ Bot activation created: ${botActivation.id}`);
 
     // Create notification
     await prisma.notification.create({
@@ -272,9 +257,7 @@ if (!passkeyRecord) {
       };
 
       await startBotInstance(bot.id, botConfig);
-      console.log(`✅ Bot ${bot.id} started successfully!`);
     } catch (engineError) {
-      console.error('Error starting bot engine:', engineError);
       // Continue - bot is created but engine failed to start
     }
 
@@ -295,7 +278,6 @@ if (!passkeyRecord) {
       },
     });
   } catch (error) {
-    console.error('Error verifying passkey:', error);
     return NextResponse.json(
       { error: 'Failed to verify passkey' },
       { status: 500 }
@@ -395,7 +377,6 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('Error checking bot status:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

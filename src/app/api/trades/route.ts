@@ -92,7 +92,6 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('Trade error:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to place trade' },
       { status: 500 }
@@ -123,7 +122,6 @@ export async function GET(req: NextRequest) {
       trades,
     });
   } catch (error: any) {
-    console.error('Get trades error:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to get trades' },
       { status: 500 }

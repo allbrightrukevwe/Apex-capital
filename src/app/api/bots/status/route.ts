@@ -65,7 +65,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching bot status:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -146,7 +145,6 @@ export async function POST(request: NextRequest) {
       message: result.message,
     });
   } catch (error: any) {
-    console.error('Error controlling bot:', error);
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
       { status: 500 }

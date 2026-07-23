@@ -130,7 +130,6 @@ export async function POST(req: NextRequest) {
       currency,
     });
   } catch (error) {
-    console.error('verify-tx error:', error);
     return NextResponse.json({ success: false, error: 'Failed to verify transaction' }, { status: 500 });
   }
 }

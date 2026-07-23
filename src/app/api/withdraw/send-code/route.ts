@@ -57,7 +57,6 @@ export async function POST(req: NextRequest) {
       `,
     });
   } catch (err) {
-    console.error('Withdrawal code email failed:', err);
     return NextResponse.json({ error: 'Failed to send verification email' }, { status: 500 });
   }
 

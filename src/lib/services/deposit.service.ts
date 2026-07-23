@@ -159,7 +159,6 @@ export class DepositService {
               `,
             });
           } catch (emailErr) {
-            console.error('Below-minimum admin email failed:', emailErr);
           }
         }
 
@@ -172,7 +171,6 @@ export class DepositService {
         deposits: newDeposits,
       };
     } catch (error) {
-      console.error('Error checking deposits:', error);
       return { success: false, error: 'Failed to check deposits' };
     }
   }
@@ -254,7 +252,6 @@ export class DepositService {
         count: deposits.length 
       };
     } catch (error) {
-      console.error('Error getting user deposits:', error);
       return { 
         success: false, 
         error: 'Failed to get deposits', 
@@ -280,7 +277,6 @@ export class DepositService {
         balance: user?.balance || 0,
       };
     } catch (error) {
-      console.error('Error getting user balance:', error);
       return { success: false, error: 'Failed to get balance' };
     }
   }
@@ -314,7 +310,6 @@ export class DepositService {
         totalNewDeposits: totalNewDeposits,
       };
     } catch (error) {
-      console.error('Error scanning wallets:', error);
       return { success: false, error: 'Failed to scan wallets' };
     }
   }

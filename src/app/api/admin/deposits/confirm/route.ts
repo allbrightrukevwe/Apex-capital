@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
           </div>
         `,
       });
-    } catch (e) { console.error('Deposit confirm user email failed:', e); }
+    } catch { /* silent */ }
 
     try {
       await transporter.sendMail({
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
           </div>
         `,
       });
-    } catch (e) { console.error('Deposit confirm admin email failed:', e); }
+    } catch { /* silent */ }
   }
 
   return NextResponse.json({ success: true, message: 'Deposit confirmed' });

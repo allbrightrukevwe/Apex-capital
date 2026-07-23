@@ -102,7 +102,6 @@ export async function POST(req: NextRequest) {
         const tag = cipher.getAuthTag();
         return `${iv.toString('base64')}:${encrypted}:${tag.toString('base64')}`;
       } catch (err) {
-        console.error('Encryption failed, storing plain key:', err);
         return `plain:${key}`;
       }
     }
@@ -128,7 +127,6 @@ export async function POST(req: NextRequest) {
     try {
       qrCode = await generateQRCodeForAddress(finalAddress);
     } catch (err) {
-      console.warn('Failed to generate QR code:', err);
     }
 
     return NextResponse.json({
@@ -144,7 +142,6 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error adding address:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to add address' },
       { status: 500 }

@@ -144,7 +144,6 @@ const Sidebar = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        console.error('Logout failed:', data.error);
       }
 
       // Clear all localStorage items
@@ -162,7 +161,6 @@ const Sidebar = () => {
       router.refresh();
       
     } catch (error) {
-      console.error('Sign out error:', error);
       // Still redirect to login even if there's an error
       router.push('/login');
     } finally {

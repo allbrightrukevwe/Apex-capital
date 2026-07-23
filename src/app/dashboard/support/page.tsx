@@ -109,7 +109,7 @@ export default function SupportPage() {
             <p className="text-slate-400 text-sm mt-0.5">Our team typically replies within minutes</p>
           </div>
           <a
-            href="mailto:support@apexcapita.io"
+            href="supportapexcapitals@gmail.com"
             className="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-700 text-slate-400 hover:text-teal-400 hover:border-teal-500/40 transition text-xs font-medium flex-shrink-0"
           >
             <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2">

@@ -70,7 +70,6 @@ export default function AdminTrades() {
         setError("Failed to fetch trades");
       }
     } catch (error) {
-      console.error("Failed to fetch trades:", error);
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);

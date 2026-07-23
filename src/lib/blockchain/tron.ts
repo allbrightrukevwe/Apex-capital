@@ -43,7 +43,6 @@ export async function createRealWallet() {
       explorer: `${EXPLORER_URL}/#/address/${account.address.base58}`,
     };
   } catch (error) {
-    console.error('Error creating wallet:', error);
     throw new Error('Failed to create TRON wallet');
   }
 }
@@ -58,7 +57,6 @@ export async function generateQRCodeForAddress(address: string): Promise<string>
     });
     return qrCodeDataUrl;
   } catch (error) {
-    console.error('Error generating QR code:', error);
     return '';
   }
 }
@@ -67,7 +65,6 @@ export async function checkUSDTTransactions(address: string, limit: number = 20)
   try {
     if (!isValidAddress(address)) return [];
     if (!API_KEY) {
-      console.warn('⚠️ TRONGRID_API_KEY not set. Skipping transaction check.');
       return [];
     }
 
@@ -82,7 +79,6 @@ export async function checkUSDTTransactions(address: string, limit: number = 20)
     });
 
     if (!response.ok) {
-      console.error(`Failed to fetch transactions: ${response.status}`);
       return [];
     }
 
@@ -111,7 +107,6 @@ export async function checkUSDTTransactions(address: string, limit: number = 20)
       status: 'confirmed',
     }));
   } catch (error) {
-    console.error('Error checking USDT transactions:', error);
     return [];
   }
 }
@@ -133,7 +128,6 @@ export async function checkAddressForDeposits(address: string) {
       address,
     };
   } catch (error) {
-    console.error('Error checking address for deposits:', error);
     return { total: 0, transactions: [], hasDeposits: false };
   }
 }
@@ -171,7 +165,6 @@ export async function verifyTxHash(txHash: string, expectedAddress: string) {
 
     return { valid: false, error: 'No matching USDT transfer to your address found in this transaction' };
   } catch (error) {
-    console.error('Error verifying tx hash:', error);
     return { valid: false, error: 'Failed to verify transaction' };
   }
 }

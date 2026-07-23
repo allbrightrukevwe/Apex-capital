@@ -86,7 +86,6 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error generating address:', error);
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Failed to generate address' },
       { status: 500 }

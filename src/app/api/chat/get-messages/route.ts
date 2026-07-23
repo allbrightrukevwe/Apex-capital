@@ -24,7 +24,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ success: true, count: messages.length, data: messages });
   } catch (error) {
-    console.error('Get messages error:', error);
     return NextResponse.json({ error: 'Failed to fetch messages' }, { status: 500 });
   }
 }

@@ -62,7 +62,6 @@ export default function AdminSettingsPage() {
         }
       }
     } catch (error) {
-      console.error("Failed to fetch settings:", error);
     } finally {
       setLoading(false);
     }

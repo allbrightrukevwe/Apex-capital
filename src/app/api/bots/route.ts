@@ -71,7 +71,6 @@ export async function GET(request: NextRequest) {
             realtimeStatus: status,
           };
         } catch (error) {
-          console.error(`Error getting status for bot ${bot.id}:`, error);
           return {
             ...bot,
             realtimeStatus: null,
@@ -85,7 +84,6 @@ export async function GET(request: NextRequest) {
       bots: botsWithStatus 
     });
   } catch (error) {
-    console.error('Error fetching bots:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -184,7 +182,6 @@ export async function POST(request: NextRequest) {
 
       if (!startResult.success) {
         // If engine fails to start, still return the bot but with a warning
-        console.warn('Bot created but engine failed to start:', startResult.message);
         return NextResponse.json({
           success: true,
           message: `Bot created but engine start failed: ${startResult.message}`,
@@ -194,7 +191,6 @@ export async function POST(request: NextRequest) {
         });
       }
     } catch (engineError) {
-      console.error('Error starting bot engine:', engineError);
       // Bot is created but engine failed - still return success with warning
       return NextResponse.json({
         success: true,
@@ -222,7 +218,6 @@ export async function POST(request: NextRequest) {
       activation: result.activation,
     });
   } catch (error: any) {
-    console.error('Error creating bot:', error);
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
       { status: 500 }

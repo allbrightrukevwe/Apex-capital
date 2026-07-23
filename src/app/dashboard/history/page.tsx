@@ -48,7 +48,6 @@ const TransactionHistory = () => {
         setSummary(data.summary || { totalDeposits: 0, totalWithdrawals: 0, totalBotProfit: 0 });
       }
     } catch (err) {
-      console.error('Failed to fetch transactions:', err);
     } finally {
       setLoading(false);
     }

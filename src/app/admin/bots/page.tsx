@@ -80,7 +80,6 @@ export default function AdminBots() {
         setError("Failed to fetch bots");
       }
     } catch (error) {
-      console.error("Failed to fetch bots:", error);
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);
@@ -168,7 +167,6 @@ export default function AdminBots() {
         fetchBots();
       }
     } catch (error) {
-      console.error("Failed to delete bot:", error);
     } finally {
       setDeleteLoading(false);
     }

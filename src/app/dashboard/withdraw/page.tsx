@@ -56,7 +56,6 @@ const WithdrawPage = () => {
         setWithdrawalHistory(data.withdrawals || []);
       }
     } catch (err) {
-      console.error('Failed to fetch withdrawals:', err);
     } finally {
       setLoadingHistory(false);
     }

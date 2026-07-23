@@ -66,15 +66,6 @@ export class BotEngineAdapter {
         leverage: config.leverage || 1,
       };
 
-      console.log(`🔧 Bot Config:`, {
-        id: botConfig.id,
-        botDatabaseId: botConfig.botDatabaseId,
-        userId: botConfig.userId,
-        tradeAmount: botConfig.tradeAmount,
-        sessionDuration: botConfig.sessionDuration,
-        asset: botConfig.asset,
-      });
-
       // ✅ Pass the database bot.id to startBotInstance
       await startBotInstance(bot.id, botConfig);
 
@@ -91,7 +82,6 @@ export class BotEngineAdapter {
 
       return { success: true, message: 'Bot started successfully' };
     } catch (error: any) {
-      console.error('Error starting bot:', error);
       return { success: false, message: error.message || 'Failed to start bot' };
     }
   }
@@ -214,7 +204,6 @@ export class BotEngineAdapter {
         status: status?.botStatus || 'stopped',
       };
     } catch (error) {
-      console.error('Error getting bot status:', error);
       return {
         isRunning: false,
         isPaused: false,
@@ -256,7 +245,6 @@ export class BotEngineAdapter {
           });
         }
       } catch (error) {
-        console.error('Error updating bot status:', error);
       }
     }, 10000);
   }

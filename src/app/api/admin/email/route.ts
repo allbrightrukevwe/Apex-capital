@@ -61,7 +61,6 @@ export async function POST(req: NextRequest) {
         subject: subject,
         text: personalizedMessage,
       }).catch(err => {
-        console.error(`Failed to send to ${user.email}:`, err.message);
         return null;
       });
     });
@@ -74,7 +73,6 @@ export async function POST(req: NextRequest) {
       sent: users.length,
     });
   } catch (error: any) {
-    console.error('Email send error:', error);
     return NextResponse.json({ error: error.message || 'Failed to send emails' }, { status: 500 });
   }
 }

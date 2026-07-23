@@ -18,7 +18,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ...result, success: true });
     
   } catch (error) {
-    console.error('Error checking deposits:', error);
     return NextResponse.json(
       { 
         success: false, 

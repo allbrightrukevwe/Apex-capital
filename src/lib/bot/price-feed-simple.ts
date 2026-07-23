@@ -18,7 +18,6 @@ export class SimplePriceFeed {
       case 'XAU': this.currentPrice = 2331.45; break;
       default: this.currentPrice = 100;
     }
-    console.log(`📡 Price feed connected for ${asset}, starting: $${this.currentPrice.toFixed(2)}`);
 
     this.intervalId = setInterval(() => {
       if (!this.isConnected) return;
@@ -31,21 +30,17 @@ export class SimplePriceFeed {
       if (this.tradeCount > 7) {
         // Small loss: -0.5% to -2%
         movePercent = -(0.005 + (Math.random() * 0.015));
-        console.log(`❌ LOSS TRADE #${this.tradeCount}: ${(movePercent * 100).toFixed(2)}%`);
       } 
       // FIRST 7 TRADES - BIG WINS
       else {
         // BIG PROFITS: +5% to +20% price increase
         movePercent = 0.05 + (Math.random() * 0.15);
-        console.log(`✅ WIN TRADE #${this.tradeCount}/7: +${(movePercent * 100).toFixed(2)}%`);
       }
       
       this.currentPrice = this.currentPrice * (1 + movePercent);
 
       if (this.currentPrice < 100) this.currentPrice = 100;
       if (this.currentPrice > 500000) this.currentPrice = 500000;
-
-      console.log(`💰 New Price: $${this.currentPrice.toFixed(2)}`);
       
       this.subscribers.forEach(cb => cb(this.currentPrice));
     }, 6000);

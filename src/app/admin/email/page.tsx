@@ -37,7 +37,6 @@ export default function AdminEmailPage() {
         setUsers(data.users || []);
       }
     } catch (error) {
-      console.error("Failed to fetch users:", error);
     } finally {
       setLoading(false);
     }

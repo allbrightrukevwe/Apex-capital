@@ -46,7 +46,6 @@ export default function AdminChatPage() {
         setMessages(data.messages || []);
       }
     } catch (error) {
-      console.error("Failed to fetch messages:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -72,7 +71,6 @@ export default function AdminChatPage() {
       setReplyText(prev => ({ ...prev, [userId]: "" }));
       fetchMessages();
     } catch (error) {
-      console.error("Failed to send reply:", error);
     } finally {
       setSending(prev => ({ ...prev, [userId]: false }));
     }
@@ -87,7 +85,6 @@ export default function AdminChatPage() {
       });
       fetchMessages();
     } catch (error) {
-      console.error("Failed to mark as read:", error);
     }
   };
 
@@ -97,7 +94,6 @@ export default function AdminChatPage() {
       await fetch(`/api/admin/chat?id=${messageId}`, { method: "DELETE" });
       fetchMessages();
     } catch (error) {
-      console.error("Failed to delete message:", error);
     }
   };
 

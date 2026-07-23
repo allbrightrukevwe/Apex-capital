@@ -18,7 +18,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ...result, success: true });
     
   } catch (error) {
-    console.error('Error fetching deposit history:', error);
     return NextResponse.json(
       { 
         success: false, 

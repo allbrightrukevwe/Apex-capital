@@ -100,7 +100,6 @@ export default function AdminUsers() {
         setError("Failed to fetch users");
       }
     } catch (error) {
-      console.error("Failed to fetch users:", error);
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);
@@ -227,7 +226,6 @@ export default function AdminUsers() {
         setDepositError(data.error || "Failed to process deposit");
       }
     } catch (error) {
-      console.error("Deposit error:", error);
       setDepositError("Network error. Please try again.");
     } finally {
       setDepositLoading(false);
@@ -246,7 +244,6 @@ export default function AdminUsers() {
         fetchUsers();
       }
     } catch (error) {
-      console.error("Failed to delete user:", error);
     } finally {
       setDeleteLoading(false);
     }
