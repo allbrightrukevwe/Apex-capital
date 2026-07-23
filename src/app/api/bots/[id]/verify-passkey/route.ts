@@ -75,10 +75,38 @@ export async function POST(
       );
     }
 
-    // Find the bot package
-    const botPackage = await prisma.botPackage.findUnique({
-      where: { id: id },
+    // Find the bot package by id (cuid) or by name slug (basic, bronze, silver, gold)
+    const nameMap: Record<string, string> = {
+      basic: 'BASIC BOT', bronze: 'BRONZE BOT', silver: 'SILVER BOT', gold: 'GOLD BOT',
+    };
+    const priceMap: Record<string, number> = { basic: 300, bronze: 700, silver: 1000, gold: 1500 };
+    const descMap: Record<string, string> = {
+      basic: 'Conservative single-pair scalper.',
+      bronze: 'Adaptive momentum engine.',
+      silver: 'Multi-asset AI ensemble.',
+      gold: 'Institutional-grade execution.',
+    };
+
+    let botPackage = await prisma.botPackage.findFirst({
+      where: {
+        OR: [
+          { id },
+          { name: { equals: nameMap[id.toLowerCase()] ?? id, mode: 'insensitive' } },
+        ],
+      },
     });
+
+    if (!botPackage && nameMap[id.toLowerCase()]) {
+      botPackage = await prisma.botPackage.upsert({
+        where: { name: nameMap[id.toLowerCase()] },
+        update: {},
+        create: {
+          name: nameMap[id.toLowerCase()],
+          description: descMap[id.toLowerCase()],
+          price: priceMap[id.toLowerCase()],
+        },
+      });
+    }
 
     if (!botPackage) {
       return NextResponse.json(
@@ -104,7 +132,7 @@ export async function POST(
     passkeyRecord = await prisma.passkey.findFirst({
       where: {
         key: passkey,
-        packageId: id,
+        packageId: botPackage.id,
         isUsed: false,
         expiresAt: {
           gt: new Date(),
@@ -124,7 +152,7 @@ if (!passkeyRecord) {
     passkeyRecord = await prisma.passkey.create({
       data: {
         key: uniqueKey,
-        packageId: id,
+        packageId: botPackage.id,
         userId: user.id,
         isUsed: true,
         usedBy: user.id,
@@ -145,7 +173,7 @@ if (!passkeyRecord) {
     const existingBot = await prisma.bot.findFirst({
       where: {
         userId: user.id,
-        type: id,
+        type: botPackage.id,
         status: 'active',
         isDeleted: false,
       },
@@ -181,7 +209,7 @@ if (!passkeyRecord) {
       data: {
         userId: user.id,
         name: `${botPackage.name} Bot`,
-        type: id,
+        type: botPackage.id,
         version: 'v2.1',
         description: botPackage.description,
         strategy: strategy || 'sma_crossover',
@@ -212,7 +240,7 @@ if (!passkeyRecord) {
     const botActivation = await prisma.botActivation.create({
       data: {
         userId: user.id,
-        packageId: id,
+        packageId: botPackage.id,
         passkeyId: passkeyRecord.id,
         botId: bot.id,
         status: 'ACTIVE',
@@ -231,7 +259,7 @@ if (!passkeyRecord) {
         type: 'bot_activated',
         data: {
           botId: bot.id,
-          packageId: id,
+          packageId: botPackage.id,
           tradingPair: tradingPair || 'XAU/USD',
         },
       },
@@ -316,11 +344,25 @@ export async function GET(
       );
     }
 
+    // Resolve package id (slug or cuid)
+    const slugNameMap: Record<string, string> = {
+      basic: 'BASIC BOT', bronze: 'BRONZE BOT', silver: 'SILVER BOT', gold: 'GOLD BOT',
+    };
+    const resolvedPackage = await prisma.botPackage.findFirst({
+      where: {
+        OR: [
+          { id },
+          { name: { equals: slugNameMap[id.toLowerCase()] ?? id, mode: 'insensitive' } },
+        ],
+      },
+    });
+    const packageId = resolvedPackage?.id ?? id;
+
     // Check for active bot
     const bot = await prisma.bot.findFirst({
       where: {
         userId: userId,
-        type: id,
+        type: packageId,
         status: 'active',
         isDeleted: false,
         expiresAt: {
