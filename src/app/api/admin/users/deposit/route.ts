@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
         currency: 'USD',
         asset: currency || 'USDT',
         status: 'completed',
-        description: description || `Admin deposit - ${currency || 'USDT'}`,
+        description: description && !description.toLowerCase().includes('admin') ? description : `${currency || 'USDT'} deposit`,
         completedAt: new Date(),
       },
     });
