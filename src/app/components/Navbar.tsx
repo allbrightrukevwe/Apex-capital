@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSmoothScroll } from '../hooks/useSmoothScroll';
+import Translator from './Translator';
 
 interface NavLink {
   href: string;
@@ -154,6 +155,7 @@ const Navbar = () => {
 
         {/* Auth Buttons (Desktop) */}
         <div className="hidden md:flex gap-3 items-center">
+          <Translator />
           <Link 
             href="/login" 
             className="text-gray-300 hover:text-teal-400 transition-colors px-3 py-2 text-sm font-semibold"
@@ -191,6 +193,9 @@ const Navbar = () => {
               </Link>
             ))}
             <div className="pt-4 border-t border-teal-500/20 flex flex-col space-y-3">
+              <div className="px-3">
+                <Translator />
+              </div>
               <Link 
                 href="/login"
                 onClick={() => setIsMobileMenuOpen(false)}

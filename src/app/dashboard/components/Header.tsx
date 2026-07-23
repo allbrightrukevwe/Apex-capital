@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useUserContext } from '@/lib/contexts/UserContext';
 import { usePathname, useRouter } from 'next/navigation';
+import Translator from '@/app/components/Translator';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard', icon: <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg> },
@@ -55,6 +56,7 @@ const Header = () => {
             {getGreeting()},&nbsp;<span className="text-white font-semibold">{displayName}</span> 👋
           </div>
           <div className="flex items-center gap-1">
+            <Translator />
             <Link href="/dashboard/notifications" className="relative w-9 h-9 flex items-center justify-center rounded-full border border-slate-700 hover:border-teal-500/40 text-slate-400 hover:text-white transition">
               <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
