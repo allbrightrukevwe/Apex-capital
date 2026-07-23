@@ -34,7 +34,10 @@ export async function GET(req: NextRequest) {
     const filter = searchParams.get('filter') || 'all';
     const search = searchParams.get('search') || '';
 
-    const where: any = { userId };
+    const where: any = {
+      userId,
+      NOT: { description: { startsWith: 'Admin deposit' } },
+    };
 
     if (filter !== 'all') {
       where.type = filter;
