@@ -1,221 +1,102 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import MobileHeader from '../components/MobileHeader';
+import Sidebar from '../components/Sidebar';
 
-// Sidebar Component
-const Sidebar = () => {
-  const pathname = usePathname();
+const typeIcon: Record<string, JSX.Element> = {
+  deposit: (
+    <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M12 3v13M5 14l7 7 7-7" /><path d="M3 21h18" />
+    </svg>
+  ),
+  withdrawal: (
+    <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M12 21V8M5 10l7-7 7 7" /><path d="M3 21h18" />
+    </svg>
+  ),
+  bot_profit: (
+    <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    </svg>
+  ),
+  bot_activated: (
+    <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+    </svg>
+  ),
+  security: (
+    <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  ),
+  system: (
+    <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+  ),
+};
 
-  const navItems = [
-    {
-      href: '/dashboard',
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="3" y="3" width="7" height="7" />
-          <rect x="14" y="3" width="7" height="7" />
-          <rect x="3" y="14" width="7" height="7" />
-          <rect x="14" y="14" width="7" height="7" />
-        </svg>
-      ),
-      label: 'Dashboard'
-    },
-    {
-      href: '/dashboard/deposit',
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M12 3v13M5 14l7 7 7-7" />
-          <path d="M3 21h18" />
-        </svg>
-      ),
-      label: 'Deposit'
-    },
-    {
-      href: '/dashboard/withdraw',
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M12 21V8M5 10l7-7 7 7" />
-          <path d="M3 21h18" />
-        </svg>
-      ),
-      label: 'Withdraw'
-    },
-    {
-      href: '/dashboard/bot-console',
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="2" y="7" width="20" height="14" rx="2" />
-          <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
-          <line x1="12" y1="12" x2="12" y2="16" />
-          <line x1="10" y1="14" x2="14" y2="14" />
-        </svg>
-      ),
-      label: 'Bot Console'
-    },
-    {
-      href: '/dashboard/live-trading',
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
-          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-        </svg>
-      ),
-      label: 'Live Trading'
-    },
-    {
-      href: '/dashboard/market',
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
-          <line x1="18" y1="20" x2="18" y2="10" />
-          <line x1="12" y1="20" x2="12" y2="4" />
-          <line x1="6" y1="20" x2="6" y2="14" />
-        </svg>
-      ),
-      label: 'Market Data'
-    },
-    {
-      href: '/dashboard/platform',
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="12" cy="12" r="10" />
-          <line x1="2" y1="12" x2="22" y2="12" />
-          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-        </svg>
-      ),
-      label: 'Live Platform'
-    },
-    {
-      href: '/dashboard/history',
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-          <polyline points="14 2 14 8 20 8" />
-          <line x1="16" y1="13" x2="8" y2="13" />
-          <line x1="16" y1="17" x2="8" y2="17" />
-        </svg>
-      ),
-      label: 'History'
-    },
-    {
-      href: '/dashboard/profile',
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
-      ),
-      label: 'Profile'
+const typeColor: Record<string, string> = {
+  deposit: 'text-teal-400 bg-teal-500/10',
+  withdrawal: 'text-red-400 bg-red-500/10',
+  bot_profit: 'text-green-400 bg-green-500/10',
+  bot_activated: 'text-blue-400 bg-blue-500/10',
+  security: 'text-amber-400 bg-amber-500/10',
+  system: 'text-slate-400 bg-slate-500/10',
+  promotion: 'text-purple-400 bg-purple-500/10',
+};
+
+export default function NotificationsPage() {
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch('/api/notifications');
+      const data = await res.json();
+      if (data.success) {
+        setNotifications(data.notifications);
+        setUnreadCount(data.unreadCount);
+      }
+    } finally {
+      setLoading(false);
     }
-  ];
-
-  const isActive = (href: string) => {
-    if (href === '/dashboard') {
-      return pathname === '/dashboard';
-    }
-    return pathname.startsWith(href);
   };
 
-  return (
-    <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-screen w-60 z-40 bg-slate-900 border-r border-teal-500/10">
-      <div className="flex flex-col h-full overflow-y-auto">
-        <div className="px-5 py-4 border-b border-teal-500/10 flex-shrink-0">
-          <Link href="/" className="text-base font-bold tracking-wider">
-            <span className="text-white">APE</span>
-            <span className="text-teal-400 text-2xl">X</span>
-            <span className="text-white"> CAPITA</span>
-          </Link>
-        </div>
+  useEffect(() => { fetchNotifications(); }, []);
 
-        <nav className="flex-1 px-2.5 py-3 space-y-0.5">
-          {navItems.map((item) => {
-            const active = isActive(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  active
-                    ? 'bg-teal-500/15 text-teal-400 border border-teal-500/25'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                {item.icon}
-                <span className="truncate">{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
+  const markAllRead = async () => {
+    await fetch('/api/notifications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    setUnreadCount(0);
+  };
 
-        <div className="px-2.5 py-3 border-t border-teal-500/10 flex-shrink-0 space-y-0.5">
-          <a
-            href="mailto:support@apexcapita.io"
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-teal-400 hover:bg-teal-500/8 transition w-full"
-          >
-            <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-              <polyline points="22,6 12,13 2,6" />
-            </svg>
-            Email Support
-          </a>
-          <button className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-red-500/8 transition w-full">
-            <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-            Sign Out
-          </button>
-        </div>
-      </div>
-    </aside>
-  );
-};
+  const markOneRead = async (id: string) => {
+    await fetch('/api/notifications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+    setUnreadCount(prev => Math.max(0, prev - 1));
+  };
 
-// Notifications Header Component
-const NotificationsHeader = () => {
-  return (
-    <header className="sticky top-0 z-30 bg-slate-950 border-b border-teal-500/10 px-4 lg:px-6 h-13 flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <button className="lg:hidden w-8 h-8 flex items-center justify-center rounded-full border border-slate-700 text-slate-400">
-          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
-        </button>
-        <Link href="/" className="lg:hidden text-sm font-bold tracking-wider">
-          <span className="text-white">APE</span>
-          <span className="text-teal-400 text-xl">X</span>
-          <span className="text-white"> CAPITA</span>
-        </Link>
-        <nav className="hidden lg:flex items-center gap-1.5 text-sm">
-          <Link href="/dashboard" className="text-slate-400 hover:text-teal-400 transition-colors">
-            Dashboard
-          </Link>
-          <span className="text-slate-600">→</span>
-          <span className="text-white font-semibold">Notifications</span>
-        </nav>
-      </div>
-      <div className="relative w-8 h-8 flex items-center justify-center rounded-full border border-teal-500/40 text-teal-400">
-        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-        </svg>
-      </div>
-    </header>
-  );
-};
+  const formatDate = (date: string) =>
+    new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-// Notifications Page Component - Empty State
-const NotificationsPage = () => {
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       <Sidebar />
-
       <div className="lg:ml-60">
-        <NotificationsHeader />
+        <MobileHeader />
+        <header className="hidden lg:flex sticky top-0 z-30 bg-slate-950 border-b border-teal-500/10 px-6 h-13 items-center justify-between">
+          <nav className="flex items-center gap-1.5 text-sm">
+            <Link href="/dashboard" className="text-slate-400 hover:text-teal-400 transition-colors">Dashboard</Link>
+            <span className="text-slate-600">→</span>
+            <span className="text-white font-semibold">Notifications</span>
+          </nav>
+        </header>
 
         <main className="px-4 py-5 lg:px-6 lg:py-6 max-w-2xl mx-auto">
-          {/* Header */}
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
               <svg viewBox="0 0 24 24" className="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" strokeWidth="2">
@@ -223,26 +104,61 @@ const NotificationsPage = () => {
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
               </svg>
               <h1 className="text-white font-bold text-xl">Notifications</h1>
+              {unreadCount > 0 && (
+                <span className="bg-teal-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{unreadCount}</span>
+              )}
             </div>
+            {unreadCount > 0 && (
+              <button onClick={markAllRead} className="text-xs text-teal-400 hover:text-teal-300 transition">
+                Mark all read
+              </button>
+            )}
           </div>
 
-          {/* Empty State */}
-          <div className="flex flex-col items-center py-16 text-center rounded-xl border border-slate-800 bg-slate-900">
-            <div className="w-14 h-14 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center mb-4">
-              <svg viewBox="0 0 24 24" className="w-7 h-7 text-slate-600" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
+          {loading ? (
+            <div className="text-center py-16"><p className="text-slate-500 text-sm">Loading...</p></div>
+          ) : notifications.length === 0 ? (
+            <div className="flex flex-col items-center py-16 text-center rounded-xl border border-slate-800 bg-slate-900">
+              <div className="w-14 h-14 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center mb-4">
+                <svg viewBox="0 0 24 24" className="w-7 h-7 text-slate-600" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+              </div>
+              <p className="text-slate-400 font-semibold text-sm">No notifications</p>
+              <p className="text-slate-600 text-xs mt-1">Deposit updates, bot results, and withdrawals will appear here.</p>
             </div>
-            <p className="text-slate-400 font-semibold text-sm">No notifications</p>
-            <p className="text-slate-600 text-xs mt-1">
-              Deposit updates, bot results, and withdrawals will appear here.
-            </p>
-          </div>
+          ) : (
+            <div className="space-y-2">
+              {notifications.map((n) => {
+                const color = typeColor[n.type] || typeColor.system;
+                const icon = typeIcon[n.type] || typeIcon.system;
+                return (
+                  <div
+                    key={n.id}
+                    onClick={() => !n.isRead && markOneRead(n.id)}
+                    className={`bg-slate-900 border rounded-lg p-3 flex items-start gap-3 cursor-pointer transition ${
+                      n.isRead ? 'border-slate-800' : 'border-teal-500/20'
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${color}`}>
+                      {icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-white text-xs font-semibold truncate">{n.title}</p>
+                        {!n.isRead && <span className="w-2 h-2 bg-teal-400 rounded-full flex-shrink-0" />}
+                      </div>
+                      <p className="text-slate-400 text-[11px] mt-0.5">{n.message}</p>
+                      <p className="text-slate-600 text-[10px] mt-1">{formatDate(n.createdAt)}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </main>
       </div>
     </div>
   );
-};
-
-export default NotificationsPage;
+}
