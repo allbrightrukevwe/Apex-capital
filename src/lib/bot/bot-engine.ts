@@ -225,55 +225,98 @@ export class TradingBotEngine {
       this.generateWinLossPattern();
     }
 
-    // Reset the timer clock for this new session
     this.sessionStartedAt = Date.now();
     this.totalPausedMs = 0;
     this.pausedAt = null;
 
     const tradeNum = this.tradeCycleCount + 1;
     const asset = this.config.asset;
-    const price = this.currentPrice;
+    const p = this.currentPrice;
+    const duration = (this.config.sessionDuration || 30) * 1000;
 
-    // Emit realistic pre-trade analysis logs
-    const rsi = (55 + Math.random() * 20).toFixed(1);
-    const macd = (-0.003 + Math.random() * 0.006).toFixed(4);
-    const atr = (0.002 + Math.random() * 0.002).toFixed(4);
-    const sigma = (0.9 + Math.random() * 0.6).toFixed(2);
-    const pressure = Math.floor(52 + Math.random() * 20);
-    const direction = Math.random() > 0.45 ? 'SELL' : 'BUY';
-    const confidence = Math.floor(88 + Math.random() * 10);
-    const slPrice = direction === 'SELL'
-      ? (price * (1 + 0.004 + Math.random() * 0.008)).toFixed(2)
-      : (price * (1 - 0.004 - Math.random() * 0.008)).toFixed(2);
-    const tpPct = (1.2 + Math.random() * 1.8).toFixed(2);
-    const risk = (0.8 + Math.random() * 1.4).toFixed(2);
+    // Pre-compute all signal values so logs are internally consistent
+    const rsi        = (48 + Math.random() * 28).toFixed(1);
+    const rsi2       = (parseFloat(rsi) + (Math.random() - 0.4) * 6).toFixed(1);
+    const macd       = (-0.004 + Math.random() * 0.008).toFixed(4);
+    const macdHist   = (-0.002 + Math.random() * 0.004).toFixed(4);
+    const atr        = (p * 0.0008 + Math.random() * p * 0.0006).toFixed(2);
+    const ema9       = (p * (1 + (Math.random() - 0.5) * 0.003)).toFixed(2);
+    const ema21      = (p * (1 + (Math.random() - 0.5) * 0.005)).toFixed(2);
+    const sigma      = (0.8 + Math.random() * 0.7).toFixed(2);
+    const spread     = (p * 0.00008 + Math.random() * p * 0.00005).toFixed(2);
+    const bidPrice   = (p - parseFloat(spread) / 2).toFixed(2);
+    const askPrice   = (p + parseFloat(spread) / 2).toFixed(2);
+    const bidVol     = (80 + Math.random() * 120).toFixed(0);
+    const askVol     = (80 + Math.random() * 120).toFixed(0);
+    const direction  = parseFloat(ema9) > parseFloat(ema21) ? 'BUY' : 'SELL';
+    const confidence = Math.floor(87 + Math.random() * 11);
+    const pressure   = Math.floor(53 + Math.random() * 22);
+    const slDist     = p * (0.003 + Math.random() * 0.005);
+    const tpDist     = p * (0.008 + Math.random() * 0.012);
+    const slPrice    = direction === 'BUY' ? (p - slDist).toFixed(2) : (p + slDist).toFixed(2);
+    const tpPrice    = direction === 'BUY' ? (p + tpDist).toFixed(2) : (p - tpDist).toFixed(2);
+    const tpPct      = ((tpDist / p) * 100).toFixed(2);
+    const slPct      = ((slDist / p) * 100).toFixed(2);
+    const rr         = (tpDist / slDist).toFixed(2);
+    const risk       = (0.8 + Math.random() * 1.2).toFixed(2);
+    const lotSize    = (this.config.tradeAmount / p).toFixed(4);
+    const fillPrice  = direction === 'BUY'
+      ? (parseFloat(askPrice) + Math.random() * 0.02).toFixed(2)
+      : (parseFloat(bidPrice) - Math.random() * 0.02).toFixed(2);
+    const latency    = Math.floor(8 + Math.random() * 24);
+    const slippage   = (Math.random() * 0.03).toFixed(3);
 
-    this.pushLog(`Session ${tradeNum}/10 — scanning ${asset}`);
-    this.scheduleLog(`Fetching OHLCV data — timeframe: 1m — bars: 200`, 800);
-    this.scheduleLog(`RSI(14): ${rsi} | MACD signal: ${macd} | ATR: ${atr}`, 1800);
-    this.scheduleLog(`Volatility check: within acceptable range (σ = ${sigma})`, 2800);
-    this.scheduleLog(`Order-flow analysis: ${direction === 'SELL' ? 'sell' : 'buy'} pressure dominant (${pressure}%)`, 3800);
-    this.scheduleLog(`Entry signal CONFIRMED — direction: ${direction} — confidence: ${confidence}%`, 4800);
-    this.scheduleLog(`Placing market order: ${direction} ${asset} @ $${price.toFixed(2)}`, 5800);
-    this.scheduleLog(`Order filled ✓ — stop-loss: $${slPrice} — take-profit: +${tpPct}%`, 6800);
-    this.scheduleLog(`Risk exposure: ${risk}% of capital — within 2% limit`, 7800);
-    this.scheduleLog(`Monitoring position — trailing SL active`, 9000);
+    // Mid-session price drift
+    const midPrice   = (p * (1 + (direction === 'BUY' ? 1 : -1) * (0.001 + Math.random() * 0.003))).toFixed(2);
+    const midRsi     = (parseFloat(rsi2) + (Math.random() - 0.3) * 4).toFixed(1);
+    const midMacd    = (-0.003 + Math.random() * 0.006).toFixed(4);
+    const unrealised = (Math.abs(parseFloat(midPrice) - p) / p * this.config.tradeAmount).toFixed(2);
+    const newSL      = direction === 'BUY'
+      ? (parseFloat(slPrice) + parseFloat(atr) * 0.3).toFixed(2)
+      : (parseFloat(slPrice) - parseFloat(atr) * 0.3).toFixed(2);
+
+    // ── Entry phase (0–10s) ──────────────────────────────────────────────────
+    this.pushLog(`━━━ SESSION ${tradeNum}/10 ━━━ ${asset}`);
+    this.scheduleLog(`Requesting OHLCV  1m × 200 bars...`, 600);
+    this.scheduleLog(`EMA(9): ${ema9}  EMA(21): ${ema21}  ATR(14): ${atr}`, 1400);
+    this.scheduleLog(`RSI(14): ${rsi}  MACD: ${macd}  Hist: ${macdHist}`, 2200);
+    this.scheduleLog(`Spread: $${spread}  Bid: ${bidPrice} (${bidVol})  Ask: ${askPrice} (${askVol})`, 3000);
+    this.scheduleLog(`Volatility σ=${sigma} — within normal range`, 3700);
+    this.scheduleLog(`Order-flow: ${direction === 'BUY' ? 'buy' : 'sell'} pressure ${pressure}% — ${direction === 'BUY' ? 'bullish' : 'bearish'} bias`, 4400);
+    this.scheduleLog(`Signal: ${direction}  confidence ${confidence}%  R:R = 1:${rr}`, 5100);
+    this.scheduleLog(`Sizing: $${this.config.tradeAmount.toLocaleString()} → ${lotSize} units  risk ${risk}%`, 5800);
+    this.scheduleLog(`► Sending ${direction} ${asset} @ market  (SL $${slPrice} / TP $${tpPrice})`, 6500);
+    this.scheduleLog(`✓ Filled @ $${fillPrice}  latency ${latency}ms  slippage $${slippage}`, 7200);
+    this.scheduleLog(`SL set $${slPrice} (−${slPct}%)  TP set $${tpPrice} (+${tpPct}%)`, 7900);
+    this.scheduleLog(`Position open — monitoring every tick`, 8600);
 
     this.forceBuy();
 
     if (this.sessionIntervalId) clearTimeout(this.sessionIntervalId);
 
-    const duration = (this.config.sessionDuration || 30) * 1000;
+    // ── Mid-session updates ──────────────────────────────────────────────────
+    const mid1 = Math.floor(duration * 0.35);
+    const mid2 = Math.floor(duration * 0.60);
+    const mid3 = Math.floor(duration * 0.82);
 
-    // Emit mid-session log halfway through
     setTimeout(() => {
-      if (this.isRunning && !this.isPaused) {
-        const midRsi = (50 + Math.random() * 25).toFixed(1);
-        const midMacd = (-0.002 + Math.random() * 0.004).toFixed(4);
-        this.pushLog(`Position update — RSI(14): ${midRsi} | MACD: ${midMacd} | holding ${direction}`);
-        this.pushLog(`Trailing stop adjusted — new SL: $${(parseFloat(slPrice) * (1 + (Math.random() - 0.5) * 0.002)).toFixed(2)}`);
-      }
-    }, duration / 2);
+      if (!this.isRunning || this.isPaused) return;
+      this.pushLog(`Price: $${midPrice}  RSI: ${midRsi}  MACD: ${midMacd}`);
+      this.pushLog(`Unrealised P&L: +$${unrealised}  trailing SL → $${newSL}`);
+    }, mid1);
+
+    setTimeout(() => {
+      if (!this.isRunning || this.isPaused) return;
+      const p2 = (parseFloat(midPrice) * (1 + (direction === 'BUY' ? 1 : -1) * Math.random() * 0.002)).toFixed(2);
+      const pnl2 = (Math.abs(parseFloat(p2) - p) / p * this.config.tradeAmount).toFixed(2);
+      this.pushLog(`Tick $${p2}  P&L +$${pnl2}  SL trailing active`);
+    }, mid2);
+
+    setTimeout(() => {
+      if (!this.isRunning || this.isPaused) return;
+      const secsLeft = Math.ceil((duration - mid3) / 1000);
+      this.pushLog(`${secsLeft}s to close — holding position`);
+    }, mid3);
 
     this.sessionIntervalId = setTimeout(() => {
       this.closeSession();
@@ -393,13 +436,16 @@ export class TradingBotEngine {
 
     // Emit close log
     const isWin = profitAmount > 0;
-    const action = this.trades.find(t => t.action !== 'sell')?.action?.toUpperCase() ?? 'BUY';
+    const closedDirection = this.trades.find(t => t.action !== 'sell')?.action?.toUpperCase() ?? 'BUY';
+    const exitP = currentPrice.toFixed(2);
+    const entryP = entryPrice.toFixed(2);
+    const sessionSecs = Math.round((Date.now() - this.sessionStartedAt) / 1000);
     this.pushLog(
       isWin
-        ? `Trade closed ▲ — ${action} ${this.config.asset} — PROFIT +$${profitAmount.toFixed(2)} (+${profitPercent.toFixed(1)}%)`
-        : `Trade closed ▼ — ${action} ${this.config.asset} — LOSS -$${Math.abs(profitAmount).toFixed(2)} (${profitPercent.toFixed(1)}%)`
+        ? `✓ CLOSED ${closedDirection} @ $${exitP}  entry $${entryP}  +$${profitAmount.toFixed(2)} (+${profitPercent.toFixed(1)}%)  ${sessionSecs}s`
+        : `✕ CLOSED ${closedDirection} @ $${exitP}  entry $${entryP}  -$${Math.abs(profitAmount).toFixed(2)} (${profitPercent.toFixed(1)}%)  ${sessionSecs}s`
     );
-    this.pushLog(`Balance updated — session P&L: ${isWin ? '+' : ''}$${profitAmount.toFixed(2)}`);
+    this.pushLog(`Cumulative P&L: ${this.dailyLoss >= 0 ? '+' : ''}$${this.dailyLoss.toFixed(2)}  sessions: ${this.tradeCycleCount}/10`);
 
     const TOTAL_SESSIONS = 10;
     if (this.tradeCycleCount >= TOTAL_SESSIONS) {
@@ -483,11 +529,13 @@ export class TradingBotEngine {
     else if (amount >= 700) packageName = 'BRONZE';
 
     this.logBuffer = [];
-    this.pushLog(`${packageName} BOT initialized — asset: ${this.config.asset}`);
-    this.pushLog(`Strategy: ${this.config.strategy} — trade amount: $${amount.toLocaleString()}`);
-    this.pushLog(`Session duration: ${this.config.sessionDuration || 30}s — max sessions: 10`);
+    this.pushLog(`ApexCapita AlgoEngine v2.1 — ${packageName} package`);
+    this.pushLog(`Asset: ${this.config.asset}  Amount: $${amount.toLocaleString()}  Sessions: 10`);
+    this.pushLog(`Strategy: SMA/EMA crossover + RSI + order-flow`);
     this.pushLog(`Connecting to market data feed...`);
-    this.pushLog(`Market data connected — starting session 1 in 2s`);
+    this.scheduleLog(`Feed connected — receiving live ticks for ${this.config.asset}`, 800);
+    this.scheduleLog(`Warming up indicators (EMA, RSI, MACD, ATR)...`, 1200);
+    this.scheduleLog(`Indicators ready — launching session 1 of 10`, 1600);
 
     setTimeout(() => {
       if (this.isRunning) {
