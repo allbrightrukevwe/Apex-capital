@@ -1,46 +1,34 @@
 export class SimplePriceFeed {
   private subscribers: Map<string, (price: number) => void> = new Map();
   private intervalId: NodeJS.Timeout | null = null;
-  private currentPrice: number = 50000;
-  private asset: string = 'BTC';
+  private currentPrice: number = 2338;
+  private asset: string = '';
   private isConnected: boolean = false;
-  private tradeCount: number = 0;
 
   connect(asset: string): void {
-    if (this.isConnected) return;
+    if (this.isConnected && this.asset === asset) return;
+    if (this.intervalId) clearInterval(this.intervalId);
     this.asset = asset;
     this.isConnected = true;
 
-    switch(asset) {
-      case 'BTC': this.currentPrice = 50000; break;
-      case 'ETH': this.currentPrice = 3000; break;
-      case 'SOL': this.currentPrice = 100; break;
-      case 'XAU': this.currentPrice = 2331.45; break;
-      default: this.currentPrice = 100;
-    }
+    const assetKey = asset.toUpperCase();
+    if (assetKey.includes('BTC')) this.currentPrice = 67500;
+    else if (assetKey.includes('ETH')) this.currentPrice = 3400;
+    else if (assetKey.includes('XAU') || assetKey.includes('GOLD')) this.currentPrice = 2338;
+    else if (assetKey.includes('GBP')) this.currentPrice = 1.27;
+    else if (assetKey.includes('SOL')) this.currentPrice = 175;
+    else this.currentPrice = 2338;
 
     this.intervalId = setInterval(() => {
       if (!this.isConnected) return;
-
-      this.tradeCount++;
-      
       let movePercent: number;
       
-      // AFTER 7 TRADES - ALWAYS SMALL LOSSES
-      if (this.tradeCount > 7) {
-        // Small loss: -0.5% to -2%
-        movePercent = -(0.005 + (Math.random() * 0.015));
-      } 
-      // FIRST 7 TRADES - BIG WINS
-      else {
-        // BIG PROFITS: +5% to +20% price increase
-        movePercent = 0.05 + (Math.random() * 0.15);
-      }
+      // Small drift: ±0.08% per tick to simulate live price movement
+      movePercent = (Math.random() - 0.48) * 0.0016;
       
       this.currentPrice = this.currentPrice * (1 + movePercent);
 
-      if (this.currentPrice < 100) this.currentPrice = 100;
-      if (this.currentPrice > 500000) this.currentPrice = 500000;
+      if (this.currentPrice < 0.0001) this.currentPrice = 0.0001;
       
       this.subscribers.forEach(cb => cb(this.currentPrice));
     }, 6000);

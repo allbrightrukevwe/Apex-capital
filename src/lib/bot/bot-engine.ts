@@ -212,6 +212,12 @@ export class TradingBotEngine {
     if (this.logBuffer.length > 60) this.logBuffer.shift();
   }
 
+  private scheduleLog(line: string, delayMs: number): void {
+    setTimeout(() => {
+      if (this.isRunning) this.pushLog(line);
+    }, delayMs);
+  }
+
   private startSession(): void {
     if (!this.isRunning || this.isPaused) return;
 
@@ -243,15 +249,15 @@ export class TradingBotEngine {
     const risk = (0.8 + Math.random() * 1.4).toFixed(2);
 
     this.pushLog(`Session ${tradeNum}/10 — scanning ${asset}`);
-    this.pushLog(`Fetching OHLCV data — timeframe: 1m — bars: 200`);
-    this.pushLog(`RSI(14): ${rsi} | MACD signal: ${macd} | ATR: ${atr}`);
-    this.pushLog(`Volatility check: within acceptable range (σ = ${sigma})`);
-    this.pushLog(`Order-flow analysis: ${direction === 'SELL' ? 'sell' : 'buy'} pressure dominant (${pressure}%)`);
-    this.pushLog(`Entry signal CONFIRMED — direction: ${direction} — confidence: ${confidence}%`);
-    this.pushLog(`Placing market order: ${direction} ${asset} @ $${price.toFixed(2)}`);
-    this.pushLog(`Order filled ✓ — stop-loss: $${slPrice} — take-profit: +${tpPct}%`);
-    this.pushLog(`Risk exposure: ${risk}% of capital — within 2% limit`);
-    this.pushLog(`Monitoring position — trailing SL active`);
+    this.scheduleLog(`Fetching OHLCV data — timeframe: 1m — bars: 200`, 800);
+    this.scheduleLog(`RSI(14): ${rsi} | MACD signal: ${macd} | ATR: ${atr}`, 1800);
+    this.scheduleLog(`Volatility check: within acceptable range (σ = ${sigma})`, 2800);
+    this.scheduleLog(`Order-flow analysis: ${direction === 'SELL' ? 'sell' : 'buy'} pressure dominant (${pressure}%)`, 3800);
+    this.scheduleLog(`Entry signal CONFIRMED — direction: ${direction} — confidence: ${confidence}%`, 4800);
+    this.scheduleLog(`Placing market order: ${direction} ${asset} @ $${price.toFixed(2)}`, 5800);
+    this.scheduleLog(`Order filled ✓ — stop-loss: $${slPrice} — take-profit: +${tpPct}%`, 6800);
+    this.scheduleLog(`Risk exposure: ${risk}% of capital — within 2% limit`, 7800);
+    this.scheduleLog(`Monitoring position — trailing SL active`, 9000);
 
     this.forceBuy();
 
