@@ -27,7 +27,9 @@ export async function POST(req: NextRequest) {
   const adminId = verifyAdmin(req);
   if (!adminId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { depositId, actualAmount } = await req.json();
+  const body = await req.json();
+  const { depositId } = body;
+  const actualAmount = parseFloat(body.actualAmount);
 
   if (!actualAmount || isNaN(actualAmount) || actualAmount <= 0)
     return NextResponse.json({ error: 'actualAmount is required' }, { status: 400 });
