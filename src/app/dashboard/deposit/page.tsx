@@ -828,7 +828,7 @@ const DepositPage = () => {
                     </button>
                     <button
                       onClick={handleGenerateAddress}
-                      disabled={!amount || parseFloat(amount) < 300 || isGenerating}
+                      disabled={!amount || parseFloat(amount) <= 0 || isGenerating}
                       className={`flex-1 font-bold py-2.5 rounded-lg transition text-xs flex items-center justify-center gap-2 ${
                         amount && parseFloat(amount) > 0 && !isGenerating
                           ? 'bg-amber-500 hover:bg-amber-400 text-slate-950'
