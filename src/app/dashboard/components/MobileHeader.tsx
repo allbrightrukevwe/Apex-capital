@@ -69,7 +69,7 @@ export default function MobileHeader() {
                       <span className="text-xs text-slate-400 block">Your account is not verified</span>
                     </div>
                     <Link
-                      href="/KYC"
+                      href="/kyc"
                       onClick={() => { setKycOpen(false); setOpen(false); }}
                       className="inline-flex items-center justify-center gap-1.5 bg-teal-500 hover:bg-teal-400 text-white text-xs font-semibold px-4 py-2 rounded-lg transition w-full"
                     >

@@ -60,14 +60,11 @@ export default function KycForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-
-      {/* Personal Details */}
       <section>
         <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-800">
           <div className="w-7 h-7 rounded-lg bg-teal-500/10 flex items-center justify-center">
             <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-teal-400" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
             </svg>
           </div>
           <h3 className="text-white font-semibold text-sm">Personal Details</h3>
@@ -83,25 +80,17 @@ export default function KycForm() {
           ].map(({ label, key, type = 'text' }) => (
             <div key={key}>
               <label className={labelClass}>{label} <span className="text-red-400">*</span></label>
-              <input
-                type={type}
-                value={formData[key as keyof KycFormData] as string}
-                onChange={e => set(key as keyof KycFormData, e.target.value as any)}
-                required
-                className={inputClass}
-              />
+              <input type={type} value={formData[key as keyof KycFormData] as string} onChange={e => set(key as keyof KycFormData, e.target.value as any)} required className={inputClass} />
             </div>
           ))}
         </div>
       </section>
 
-      {/* Address */}
       <section>
         <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-800">
           <div className="w-7 h-7 rounded-lg bg-teal-500/10 flex items-center justify-center">
             <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-teal-400" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-              <circle cx="12" cy="10" r="3" />
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
             </svg>
           </div>
           <h3 className="text-white font-semibold text-sm">Residential Address</h3>
@@ -115,36 +104,24 @@ export default function KycForm() {
           ].map(({ label, key }) => (
             <div key={key}>
               <label className={labelClass}>{label} <span className="text-red-400">*</span></label>
-              <input
-                type="text"
-                value={formData[key as keyof KycFormData] as string}
-                onChange={e => set(key as keyof KycFormData, e.target.value as any)}
-                required
-                className={inputClass}
-              />
+              <input type="text" value={formData[key as keyof KycFormData] as string} onChange={e => set(key as keyof KycFormData, e.target.value as any)} required className={inputClass} />
             </div>
           ))}
         </div>
       </section>
 
-      {/* Document Upload */}
       <section>
         <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-800">
           <div className="w-7 h-7 rounded-lg bg-teal-500/10 flex items-center justify-center">
             <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-teal-400" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
             </svg>
           </div>
           <h3 className="text-white font-semibold text-sm">Identity Document</h3>
         </div>
-        <DocumentUpload
-          documentType={formData.document_type}
-          onChange={(type: DocumentType) => set('document_type', type)}
-        />
+        <DocumentUpload documentType={formData.document_type} onChange={(type: DocumentType) => set('document_type', type)} />
       </section>
 
-      {/* File Uploads */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className={labelClass}>Front Side <span className="text-red-400">*</span></label>
@@ -156,51 +133,24 @@ export default function KycForm() {
         </div>
       </section>
 
-      {/* Error */}
-      {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-red-400 text-sm">{error}</div>
-      )}
+      {error && <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-red-400 text-sm">{error}</div>}
 
-      {/* Agreement + Submit */}
       <div className="pt-2 space-y-4">
         <label className="flex items-start gap-3 cursor-pointer">
           <div className="relative mt-0.5">
-            <input
-              type="checkbox"
-              checked={formData.agree}
-              onChange={e => set('agree', e.target.checked)}
-              className="sr-only"
-            />
+            <input type="checkbox" checked={formData.agree} onChange={e => set('agree', e.target.checked)} className="sr-only" />
             <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition ${formData.agree ? 'bg-teal-500 border-teal-500' : 'border-slate-600 bg-slate-800'}`}>
-              {formData.agree && (
-                <svg viewBox="0 0 24 24" className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="3">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              )}
+              {formData.agree && <svg viewBox="0 0 24 24" className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>}
             </div>
           </div>
           <span className="text-slate-400 text-sm">I confirm that all the information I have entered is accurate and correct.</span>
         </label>
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full py-3 rounded-xl bg-teal-500 hover:bg-teal-400 text-white font-semibold text-sm transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        >
+        <button type="submit" disabled={submitting} className="w-full py-3 rounded-xl bg-teal-500 hover:bg-teal-400 text-white font-semibold text-sm transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
           {submitting ? (
-            <>
-              <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-              </svg>
-              Submitting...
-            </>
+            <><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>Submitting...</>
           ) : (
-            <>
-              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
-              Submit KYC Application
-            </>
+            <><svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>Submit KYC Application</>
           )}
         </button>
       </div>
