@@ -19,6 +19,7 @@ const NAV_ITEMS = [
 
 export default function MobileHeader() {
   const [open, setOpen] = useState(false);
+  const [kycOpen, setKycOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -41,6 +42,48 @@ export default function MobileHeader() {
           <span className="text-white"> CAPITA</span>
         </Link>
         <div className="flex items-center gap-2">
+          {/* KYC Button */}
+          <div className="relative">
+            <button
+              onClick={() => setKycOpen(prev => !prev)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-teal-400 hover:border-teal-500/40 text-xs font-medium transition"
+            >
+              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+              <span className="hidden sm:inline">KYC</span>
+            </button>
+            {kycOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setKycOpen(false)} />
+                <div className="absolute right-0 mt-2 w-56 bg-slate-900 border border-slate-700 rounded-xl shadow-xl overflow-hidden z-50">
+                  <div className="px-4 py-3 border-b border-slate-800 bg-slate-800/50">
+                    <h6 className="text-sm font-semibold text-white">KYC Verification</h6>
+                    <p className="text-xs text-slate-400 mt-0.5">Verify your identity to unlock all features</p>
+                  </div>
+                  <div className="p-4 text-center">
+                    <div className="bg-slate-800 rounded-lg p-3 mb-3">
+                      <svg viewBox="0 0 24 24" className="w-8 h-8 text-amber-400 mx-auto mb-2" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      </svg>
+                      <span className="text-xs text-slate-400 block">Your account is not verified</span>
+                    </div>
+                    <Link
+                      href="/KYC"
+                      onClick={() => { setKycOpen(false); setOpen(false); }}
+                      className="inline-flex items-center justify-center gap-1.5 bg-teal-500 hover:bg-teal-400 text-white text-xs font-semibold px-4 py-2 rounded-lg transition w-full"
+                    >
+                      <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                      </svg>
+                      Verify Account
+                    </Link>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
           <Link href="/dashboard/notifications" className="relative w-9 h-9 flex items-center justify-center rounded-full border border-slate-700 text-slate-400">
             <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
