@@ -102,7 +102,7 @@ const LoginForm = () => {
 
       <div className="w-full max-w-md relative">
         <div className="flex items-center mb-8">
-          <Link href="/" className="flex items-center gap-1.5 text-slate-400 hover:text-white transition text-sm">
+          <Link href="/KYC" className="flex items-center gap-1.5 text-slate-400 hover:text-white transition text-sm">
             <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="19" y1="12" x2="5" y2="12" />
               <polyline points="12 19 5 12 12 5" />

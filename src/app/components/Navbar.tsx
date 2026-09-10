@@ -74,12 +74,12 @@ const Navbar = () => {
         </button>
 
         {/* Logo */}
-        <Link href="/admin" className="text-xl lg:text-2xl font-bold tracking-wider">
+        <Link href="/" className="text-xl lg:text-2xl font-bold tracking-wider">
           <span className="text-white">APE</span>
           <span className="text-teal-400 text-2xl lg:text-3xl">X</span>
           <span className="text-white"> CAPITA</span>
         </Link>
- 
+        
         {/* Desktop Navigation */}
         <div className="hidden md:flex gap-8 items-center flex-1 justify-center">
           {navLinks.map((link) => (

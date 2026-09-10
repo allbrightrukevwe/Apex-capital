@@ -125,6 +125,7 @@ const Footer = () => {
               <p className="text-gray-400 text-sm">
                 Advanced AI-powered trading that works 24/7 to generate profits.
               </p>
+              
             </div>
 
             {/* Footer Sections */}
